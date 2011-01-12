@@ -10,9 +10,9 @@ LOCAL_C_INCLUDES:= \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    system/media/opensles/include \
+    system/media/wilhelm/include \
     external/stlport/stlport \
-    system/media/opensles/libopensles
+    system/media/wilhelm/src/ut
 
 LOCAL_SRC_FILES:= \
     BufferQueue_test.cpp

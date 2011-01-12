@@ -55,7 +55,7 @@ typedef int bool;
 #include "MPH.h"
 #include "MPH_to.h"
 #include "devices.h"
-#include "OpenSLESUT.h"
+#include "ut/OpenSLESUT.h"
 #include "ThreadPool.h"
 
 typedef struct CEngine_struct CEngine;
@@ -66,7 +66,7 @@ typedef struct COutputMix_struct COutputMix;
 
 #ifdef USE_SNDFILE
 #include <sndfile.h>
-#include "SLSndFile.h"
+#include "desktop/SLSndFile.h"
 #endif // USE_SNDFILE
 
 #ifdef USE_SDL
@@ -95,15 +95,15 @@ typedef struct COutputMix_struct COutputMix;
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
-#include "android_sles_conversions.h"
-#include "android_OutputMix.h"
-#include "android_defs.h"
-#include "android_SfPlayer.h"
+#include "android/android_sles_conversions.h"
+#include "android/android_OutputMix.h"
+#include "android/android_defs.h"
+#include "android/android_SfPlayer.h"
+#include "android/android_AudioRecorder.h"
 #endif
-#include "android_AudioRecorder.h"
 
 #ifdef USE_OUTPUTMIXEXT
-#include "OutputMixExt.h"
+#include "desktop/OutputMixExt.h"
 #endif
 
 #include "sllog.h"
@@ -260,10 +260,10 @@ struct SndFile {
 
 #ifdef ANDROID
 // FIXME this include is done here so the effect structures and enums have been defined. Messy.
-#include "android_Effect.h"
-#include "android_AVPlayer.h"
-#include "android_StreamPlayer.h"
-#include "android_LocAVPlayer.h"
+#include "android/android_Effect.h"
+#include "android/android_AVPlayer.h"
+#include "android/android_StreamPlayer.h"
+#include "android/android_LocAVPlayer.h"
 #endif
 
 #endif  // ANDROID
@@ -310,8 +310,8 @@ extern void IObject_Destroy(SLObjectItf self);
 #define InterfaceToCAudioRecorder(this) (((CAudioRecorder*)InterfaceToIObject(this)))
 
 #ifdef ANDROID
-#include "android_Player.h"
-#include "android_AudioPlayer.h"
+#include "android/android_Player.h"
+#include "android/android_AudioPlayer.h"
 #endif
 
 extern predestroy_t C3DGroup_PreDestroy(void *self);

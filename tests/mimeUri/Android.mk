@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTest_playStates.cpp
@@ -31,7 +31,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTestPlayStreamType.cpp
@@ -55,7 +55,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTestPlayUri.cpp
@@ -79,7 +79,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTestLoopUri.cpp
@@ -103,7 +103,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTestPlayUri2.cpp
@@ -127,7 +127,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTestSlowDownUri.cpp

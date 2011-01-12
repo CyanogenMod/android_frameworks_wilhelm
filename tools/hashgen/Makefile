@@ -1,7 +1,7 @@
 all : IID_to_MPH.c
 
 install :
-	cp IID_to_MPH.c ../../libopensles
+	cp IID_to_MPH.c ../../src/autogen
 
 CFLAGS = -I../../include -g -DNDEBUG
 

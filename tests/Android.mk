@@ -20,7 +20,7 @@ c_includes := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    system/media/opensles/include \
+    system/media/wilhelm/include \
     external/stlport/stlport
 
 module_tags := tests
