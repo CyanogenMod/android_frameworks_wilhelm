@@ -47,7 +47,7 @@ static void convert(const signed char MPH_to[MPH_MAX], const char *filename)
     fclose(fp);
 }
 
-#define _(x) convert(MPH_to_##x, "../../libopensles/MPH_to_" #x ".h");
+#define _(x) convert(MPH_to_##x, "../../src/autogen/MPH_to_" #x ".h");
 
 int main(int argc, char **argv)
 {
