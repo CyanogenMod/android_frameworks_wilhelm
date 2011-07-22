@@ -52,6 +52,7 @@ static inline SLuint32 KEY_FROM_GUID(SLInterfaceID pUuid) {
 
 
 //-----------------------------------------------------------------------------
+static
 uint32_t eq_paramSize(int32_t param) {
     uint32_t size;
 
@@ -77,6 +78,7 @@ uint32_t eq_paramSize(int32_t param) {
     return size;
 }
 
+static
 uint32_t eq_valueSize(int32_t param) {
     uint32_t size;
 
@@ -112,6 +114,7 @@ uint32_t eq_valueSize(int32_t param) {
 /**
  * returns the size in bytes of the value of each bass boost parameter
  */
+static
 uint32_t bb_valueSize(int32_t param) {
     uint32_t size;
 
@@ -135,6 +138,7 @@ uint32_t bb_valueSize(int32_t param) {
 /**
  * returns the size in bytes of the value of each virtualizer parameter
  */
+static
 uint32_t virt_valueSize(int32_t param) {
     uint32_t size;
 
@@ -158,6 +162,7 @@ uint32_t virt_valueSize(int32_t param) {
 /**
  * returns the size in bytes of the value of each environmental reverb parameter
  */
+static
 uint32_t erev_valueSize(int32_t param) {
     uint32_t size;
 

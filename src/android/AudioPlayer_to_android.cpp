@@ -562,6 +562,7 @@ bool audioPlayer_isSupportedNonOutputMixSink(const SLDataSink* pAudioSink) {
  * returns the Android object type if the locator type combinations for the source and sinks
  *   are supported by this implementation, INVALID_TYPE otherwise
  */
+static
 AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(const CAudioPlayer *ap) {
 
     const SLDataSource *pAudioSrc = &ap->mDataSource.u.mSource;
