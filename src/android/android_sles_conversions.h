@@ -21,10 +21,6 @@
 //-----------------------------------------------------------------------------
 // Android to OpenSL ES
 //----------------------
-static inline SLuint32 android_to_sles_streamType(int type) {
-    return (SLuint32) type;
-}
-
 
 static inline SLuint32 android_to_sles_sampleRate(uint32_t srHz) {
     // convert to milliHertz
@@ -35,10 +31,6 @@ static inline SLuint32 android_to_sles_sampleRate(uint32_t srHz) {
 //-----------------------------------------------------------------------------
 // OpenSL ES to Android
 //----------------------
-static inline int sles_to_android_streamType(SLuint32 type) {
-    return (int)type;
-}
-
 
 static inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz) {
     return (uint32_t)(sampleRateMilliHertz / 1000);
