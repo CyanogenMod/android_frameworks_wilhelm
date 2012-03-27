@@ -160,8 +160,8 @@ EXCLUDE_SRC :=                            \
 
 LOCAL_C_INCLUDES:=                                                  \
         $(call include-path-for, wilhelm)                           \
-        frameworks/base/media/libstagefright                        \
-        frameworks/base/media/libstagefright/include                \
+        frameworks/av/media/libstagefright                        \
+        frameworks/av/media/libstagefright/include                \
         frameworks/native/include/media/openmax                     \
         $(call include-path-for, audio-effects)
 
@@ -201,8 +201,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := sl_entry.c sl_iid.c assert.c
 LOCAL_C_INCLUDES:=                                                  \
         $(call include-path-for, wilhelm)                           \
-        frameworks/base/media/libstagefright                        \
-        frameworks/base/media/libstagefright/include                \
+        frameworks/av/media/libstagefright                        \
+        frameworks/av/media/libstagefright/include                \
         frameworks/native/include/media/openmax
 LOCAL_MODULE := libOpenSLES
 LOCAL_PRELINK_MODULE := false
@@ -216,8 +216,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := xa_entry.c xa_iid.c assert.c
 LOCAL_C_INCLUDES:=                                                  \
         $(call include-path-for, wilhelm)                           \
-        frameworks/base/media/libstagefright                        \
-        frameworks/base/media/libstagefright/include                \
+        frameworks/av/media/libstagefright                        \
+        frameworks/av/media/libstagefright/include                \
         frameworks/native/include/media/openmax
 LOCAL_MODULE := libOpenMAXAL
 LOCAL_PRELINK_MODULE := false
