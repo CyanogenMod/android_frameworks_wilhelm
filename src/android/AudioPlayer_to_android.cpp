@@ -1345,6 +1345,78 @@ SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey
 }
 
 
+// Called from android_audioPlayer_realize for a PCM buffer queue player
+// to determine if it can use a fast track.
+static bool canUseFastTrack(CAudioPlayer *pAudioPlayer)
+{
+    assert(pAudioPlayer->mAndroidObjType == AUDIOPLAYER_FROM_PCM_BUFFERQUEUE);
+    if (pAudioPlayer->mBufferQueue.mNumBuffers < 2) {
+        return false;
+    }
+
+    // Check a blacklist of interfaces that are incompatible with fast tracks.
+    // The alternative, to check a whitelist of compatible interfaces, is
+    // more maintainable but is too slow.  As a compromise, in a debug build
+    // we use both methods and warn if they produce different results.
+    // In release builds, we only use the blacklist method.
+    // If a blacklisted interface is added after realization using
+    // DynamicInterfaceManagement::AddInterface,
+    // then this won't be detected but the interface will be ineffective.
+    bool blacklistResult = true;
+    static const unsigned blacklist[] = {
+        MPH_BASSBOOST,
+        MPH_EFFECTSEND,
+        MPH_ENVIRONMENTALREVERB,
+        MPH_EQUALIZER,
+        MPH_MUTESOLO,       // FIXME move to whitelist when implemented by server
+        MPH_PLAYBACKRATE,
+        MPH_PRESETREVERB,
+        MPH_VIRTUALIZER,
+        MPH_VOLUME,         // FIXME move to whitelist when implemented by server
+        MPH_ANDROIDEFFECT,
+        MPH_ANDROIDEFFECTSEND,
+        // FIXME The problem with a blacklist is remembering to add new interfaces here
+    };
+    for (unsigned i = 0; i < sizeof(blacklist)/sizeof(blacklist[0]); ++i) {
+        if (IsInterfaceInitialized(&pAudioPlayer->mObject, blacklist[i])) {
+            blacklistResult = false;
+            break;
+        }
+    }
+#if LOG_NDEBUG == 0
+    bool whitelistResult = true;
+    static const unsigned whitelist[] = {
+        MPH_BUFFERQUEUE,
+        MPH_DYNAMICINTERFACEMANAGEMENT,
+        MPH_OBJECT,
+        MPH_METADATAEXTRACTION,
+        MPH_PLAY,
+        MPH_PREFETCHSTATUS,
+        MPH_ANDROIDCONFIGURATION,
+        MPH_ANDROIDSIMPLEBUFFERQUEUE,
+        MPH_ANDROIDBUFFERQUEUESOURCE,
+    };
+    for (unsigned mph = MPH_MIN; mph < MPH_MAX; ++mph) {
+        for (unsigned i = 0; i < sizeof(whitelist)/sizeof(whitelist[0]); ++i) {
+            if (mph == whitelist[i]) {
+                goto compatible;
+            }
+        }
+        if (IsInterfaceInitialized(&pAudioPlayer->mObject, mph)) {
+            whitelistResult = false;
+            break;
+        }
+compatible: ;
+    }
+    if (whitelistResult != blacklistResult) {
+        ALOGW("whitelistResult != blacklistResult");
+        // and use blacklistResult below
+    }
+#endif
+    return blacklistResult;
+}
+
+
 //-----------------------------------------------------------------------------
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async) {
@@ -1371,19 +1443,28 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
+        size_t frameCount;
+        audio_policy_output_flags_t policy;
+        if (canUseFastTrack(pAudioPlayer)) {
+            frameCount = 512;   // FIXME hard-coded
+            policy = AUDIO_POLICY_OUTPUT_FLAG_FAST;
+        } else {
+            frameCount = 0;
+            policy = AUDIO_POLICY_OUTPUT_FLAG_NONE;
+        }
+
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
                 sles_to_android_channelMaskOut(df_pcm->numChannels, df_pcm->channelMask),
-                                                                     //channel mask
-                0,                                                   // frameCount (here min)
-                AUDIO_POLICY_OUTPUT_FLAG_NONE,                       // flags
+                                                                     // channel mask
+                frameCount,                                          // frameCount
+                policy,                                              // flags
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
-                0      // FIXME find appropriate frame count         // notificationFrame
-                , pAudioPlayer->mSessionId
-                );
+                0,     // FIXME find appropriate frame count         // notificationFrame
+                pAudioPlayer->mSessionId);
         android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
         if (status != android::NO_ERROR) {
             SL_LOGE("AudioTrack::initCheck status %u", status);
