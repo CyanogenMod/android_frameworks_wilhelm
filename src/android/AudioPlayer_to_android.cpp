@@ -1368,11 +1368,9 @@ static bool canUseFastTrack(CAudioPlayer *pAudioPlayer)
         MPH_EFFECTSEND,
         MPH_ENVIRONMENTALREVERB,
         MPH_EQUALIZER,
-        MPH_MUTESOLO,       // FIXME move to whitelist when implemented by server
         MPH_PLAYBACKRATE,
         MPH_PRESETREVERB,
         MPH_VIRTUALIZER,
-        MPH_VOLUME,         // FIXME move to whitelist when implemented by server
         MPH_ANDROIDEFFECT,
         MPH_ANDROIDEFFECTSEND,
         // FIXME The problem with a blacklist is remembering to add new interfaces here
@@ -1388,10 +1386,12 @@ static bool canUseFastTrack(CAudioPlayer *pAudioPlayer)
     static const unsigned whitelist[] = {
         MPH_BUFFERQUEUE,
         MPH_DYNAMICINTERFACEMANAGEMENT,
-        MPH_OBJECT,
         MPH_METADATAEXTRACTION,
+        MPH_MUTESOLO,
+        MPH_OBJECT,
         MPH_PLAY,
         MPH_PREFETCHSTATUS,
+        MPH_VOLUME,
         MPH_ANDROIDCONFIGURATION,
         MPH_ANDROIDSIMPLEBUFFERQUEUE,
         MPH_ANDROIDBUFFERQUEUESOURCE,
@@ -1443,13 +1443,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
-        size_t frameCount;
         audio_policy_output_flags_t policy;
         if (canUseFastTrack(pAudioPlayer)) {
-            frameCount = 512;   // FIXME hard-coded
             policy = AUDIO_POLICY_OUTPUT_FLAG_FAST;
         } else {
-            frameCount = 0;
             policy = AUDIO_POLICY_OUTPUT_FLAG_NONE;
         }
 
@@ -1459,7 +1456,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
                 sles_to_android_channelMaskOut(df_pcm->numChannels, df_pcm->channelMask),
                                                                      // channel mask
-                frameCount,                                          // frameCount
+                0,                                                   // frameCount
                 policy,                                              // flags
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
