@@ -118,6 +118,7 @@ int main(int argc, char **argv)
     byteOrder = nativeByteOrder;
 
     SLboolean enableReverb = SL_BOOLEAN_FALSE;
+    SLboolean enablePlaybackRate = SL_BOOLEAN_FALSE;
     SLpermille initialRate = 0;
     SLpermille finalRate = 0;
     SLpermille deltaRate = 1;
@@ -142,16 +143,20 @@ int main(int argc, char **argv)
             numBuffers = atoi(&arg[2]);
         } else if (!strncmp(arg, "-p", 2)) {
             initialRate = atoi(&arg[2]);
+            enablePlaybackRate = SL_BOOLEAN_TRUE;
         } else if (!strncmp(arg, "-P", 2)) {
             finalRate = atoi(&arg[2]);
+            enablePlaybackRate = SL_BOOLEAN_TRUE;
         } else if (!strncmp(arg, "-q", 2)) {
             deltaRate = atoi(&arg[2]);
             // deltaRate is a magnitude, so take absolute value
             if (deltaRate < 0) {
                 deltaRate = -deltaRate;
             }
+            enablePlaybackRate = SL_BOOLEAN_TRUE;
         } else if (!strncmp(arg, "-Q", 2)) {
             deltaRateMs = atoi(&arg[2]);
+            enablePlaybackRate = SL_BOOLEAN_TRUE;
         } else if (!strcmp(arg, "-r")) {
             enableReverb = SL_BOOLEAN_TRUE;
         } else {
@@ -294,7 +299,7 @@ int main(int argc, char **argv)
     SLboolean req2[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     SLObjectItf playerObject;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
-            &audioSnk, enableReverb ? 3 : 2, ids2, req2);
+            &audioSnk, enableReverb ? 3 : (enablePlaybackRate ? 2 : 1), ids2, req2);
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stderr, "can't create audio player\n");
         goto no_player;
@@ -316,38 +321,43 @@ int main(int argc, char **argv)
 
     // get the playback rate interface and configure the rate
     SLPlaybackRateItf playerPlaybackRate;
-    result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAYBACKRATE, &playerPlaybackRate);
-    assert(SL_RESULT_SUCCESS == result);
-    SLpermille defaultRate;
-    result = (*playerPlaybackRate)->GetRate(playerPlaybackRate, &defaultRate);
-    assert(SL_RESULT_SUCCESS == result);
-    SLuint32 defaultProperties;
-    result = (*playerPlaybackRate)->GetProperties(playerPlaybackRate, &defaultProperties);
-    assert(SL_RESULT_SUCCESS == result);
-    printf("default playback rate %d per mille, properties 0x%x\n", defaultRate, defaultProperties);
-    if (initialRate <= 0) {
-        initialRate = defaultRate;
-    }
-    if (finalRate <= 0) {
-        finalRate = initialRate;
-    }
-    SLpermille currentRate = defaultRate;
-    if (finalRate == initialRate) {
-        deltaRate = 0;
-    } else if (finalRate < initialRate) {
-        deltaRate = -deltaRate;
-    }
-    if (initialRate != defaultRate) {
-        result = (*playerPlaybackRate)->SetRate(playerPlaybackRate, initialRate);
-        if (SL_RESULT_FEATURE_UNSUPPORTED == result) {
-            fprintf(stderr, "initial playback rate %d is unsupported\n", initialRate);
+    SLpermille currentRate;
+    if (enablePlaybackRate) {
+        result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAYBACKRATE,
+                &playerPlaybackRate);
+        assert(SL_RESULT_SUCCESS == result);
+        SLpermille defaultRate;
+        result = (*playerPlaybackRate)->GetRate(playerPlaybackRate, &defaultRate);
+        assert(SL_RESULT_SUCCESS == result);
+        SLuint32 defaultProperties;
+        result = (*playerPlaybackRate)->GetProperties(playerPlaybackRate, &defaultProperties);
+        assert(SL_RESULT_SUCCESS == result);
+        printf("default playback rate %d per mille, properties 0x%x\n", defaultRate,
+                defaultProperties);
+        if (initialRate <= 0) {
+            initialRate = defaultRate;
+        }
+        if (finalRate <= 0) {
+            finalRate = initialRate;
+        }
+        currentRate = defaultRate;
+        if (finalRate == initialRate) {
             deltaRate = 0;
-        } else if (SL_RESULT_PARAMETER_INVALID == result) {
-            fprintf(stderr, "initial playback rate %d is invalid\n", initialRate);
-            deltaRate = 0;
-        } else {
-            assert(SL_RESULT_SUCCESS == result);
-            currentRate = initialRate;
+        } else if (finalRate < initialRate) {
+            deltaRate = -deltaRate;
+        }
+        if (initialRate != defaultRate) {
+            result = (*playerPlaybackRate)->SetRate(playerPlaybackRate, initialRate);
+            if (SL_RESULT_FEATURE_UNSUPPORTED == result) {
+                fprintf(stderr, "initial playback rate %d is unsupported\n", initialRate);
+                deltaRate = 0;
+            } else if (SL_RESULT_PARAMETER_INVALID == result) {
+                fprintf(stderr, "initial playback rate %d is invalid\n", initialRate);
+                deltaRate = 0;
+            } else {
+                assert(SL_RESULT_SUCCESS == result);
+                currentRate = initialRate;
+            }
         }
     }
 
@@ -411,7 +421,7 @@ int main(int argc, char **argv)
         if (0 >= bufqstate.count) {
             break;
         }
-        if (deltaRate == 0) {
+        if (!enablePlaybackRate || deltaRate == 0) {
             sleep(1);
         } else {
             struct timespec curTs;
