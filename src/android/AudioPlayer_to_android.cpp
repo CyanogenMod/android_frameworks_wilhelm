@@ -1443,11 +1443,11 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
-        audio_policy_output_flags_t policy;
+        audio_output_flags_t policy;
         if (canUseFastTrack(pAudioPlayer)) {
-            policy = AUDIO_POLICY_OUTPUT_FLAG_FAST;
+            policy = AUDIO_OUTPUT_FLAG_FAST;
         } else {
-            policy = AUDIO_POLICY_OUTPUT_FLAG_NONE;
+            policy = AUDIO_OUTPUT_FLAG_NONE;
         }
 
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
