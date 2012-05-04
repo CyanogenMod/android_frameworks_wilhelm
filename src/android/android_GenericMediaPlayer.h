@@ -91,6 +91,8 @@ public:
 
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
 
+    virtual void setPlaybackRate(int32_t ratePermille);
+
 protected:
     friend class MediaPlayerNotificationClient;
 

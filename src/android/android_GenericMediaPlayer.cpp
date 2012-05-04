@@ -308,6 +308,20 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
     mVideoSurfaceTexture = surfaceTexture;
 }
 
+//--------------------------------------------------
+void GenericMediaPlayer::setPlaybackRate(int32_t ratePermille) {
+    SL_LOGV("GenericMediaPlayer::setPlaybackRate(%d)", ratePermille);
+    GenericPlayer::setPlaybackRate(ratePermille);
+    sp<IMediaPlayer> player;
+    getPreparedPlayer(player);
+    if (player != 0) {
+        Parcel rateParcel;
+        if (rateParcel.writeInt32(ratePermille) == OK) {
+            player->setParameter(KEY_PARAMETER_PLAYBACK_RATE_PERMILLE, rateParcel);
+        }
+    }
+}
+
 
 //--------------------------------------------------
 // Event handlers
@@ -574,6 +588,11 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
         }
     } else {
         SL_LOGD("media player prepared on non-local source");
+    }
+    // when the MediaPlayer mPlayer is prepared, apply the playback rate
+    Parcel rateParcel;
+    if (rateParcel.writeInt32((int32_t)mPlaybackRatePermille) == OK) {
+        mPlayer->setParameter(KEY_PARAMETER_PLAYBACK_RATE_PERMILLE, rateParcel);
     }
 }
 
