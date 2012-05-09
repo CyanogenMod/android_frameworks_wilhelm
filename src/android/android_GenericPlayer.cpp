@@ -31,6 +31,7 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mStateFlags(0),
         mPlaybackParams(*params),
         mDurationMsec(ANDROID_UNKNOWN_TIME),
+        mPlaybackRatePermille(1000),
         mCacheStatus(kStatusEmpty),
         mCacheFill(0),
         mLastNotifiedCacheFill(0),
@@ -229,6 +230,15 @@ void GenericPlayer::setAuxEffectSendLevel(float level)
     msg->post();
 }
 
+
+//--------------------------------------------------
+void GenericPlayer::setPlaybackRate(int32_t ratePermille) {
+    SL_LOGV("GenericPlayer::setPlaybackRate(ratePermille=%d)", ratePermille);
+    {
+        Mutex::Autolock _l(mSettingsLock);
+        mPlaybackRatePermille = (int16_t)ratePermille;
+    }
+}
 
 //--------------------------------------------------
 // Call after changing any of the IPlay settings related to SL_PLAYEVENT_*
@@ -671,8 +681,20 @@ void GenericPlayer::updateOneShot(int positionMs)
     // we have a new observed position
     mObservedPositionMs = positionMs;
 
+    if (mPlaybackRatePermille == 0) {
+        // playback is frozen, no update expected (and no division by zero below)
+        return;
+    }
+
     // post the new one-shot message if needed
     if (advancesPositionInRealTime() && delayUs >= 0) {
+        // scale delay according to playback rate (reported positions won't change, but reported
+        // time will advance slower or faster depending on rate)
+        {
+            Mutex::Autolock _l(mSettingsLock);
+            delayUs =  delayUs * 1000 / mPlaybackRatePermille;
+        }
+
         // 20 ms min delay to avoid near busy waiting
         if (delayUs < 20000LL) {
             delayUs = 20000LL;

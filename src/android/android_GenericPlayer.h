@@ -84,6 +84,8 @@ public:
     void attachAuxEffect(int32_t effectId);
     void setAuxEffectSendLevel(float level);
 
+    virtual void setPlaybackRate(int32_t ratePermille);
+
     // Call after changing any of the IPlay settings related to SL_PLAYEVENT_*
     void setPlayEvents(int32_t eventFlags, int32_t markerPosition, int32_t positionUpdatePeriod);
 
@@ -181,6 +183,7 @@ protected:
 
     // protected by mSettingsLock
     int32_t mDurationMsec;
+    int16_t mPlaybackRatePermille;
 
     CacheStatus_t mCacheStatus;
     int16_t mCacheFill; // cache fill level + played back level in permille
@@ -191,6 +194,9 @@ protected:
     // supply the latest known position or ANDROID_UNKNOWN_TIME if position is unknown to caller.
     void updateOneShot(int positionMs = ANDROID_UNKNOWN_TIME);
 
+    // players that "render" data to present it to the user (a music player, a video player),
+    // should return true, while players that only decode (hopefully faster than "real time")
+    // should return false.
     virtual bool advancesPositionInRealTime() const { return true; }
 
 private:

@@ -33,6 +33,9 @@ template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 #define AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE  500
 #define AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE 2000
 
+#define MEDIAPLAYER_MIN_PLAYBACKRATE_PERMILLE AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE
+#define MEDIAPLAYER_MAX_PLAYBACKRATE_PERMILLE AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE
+
 //-----------------------------------------------------------------------------
 // FIXME this method will be absorbed into android_audioPlayer_setPlayState() once
 //       bufferqueue and uri/fd playback are moved under the GenericPlayer C++ object
@@ -1276,11 +1279,14 @@ void android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
     // can be set or used regardless of whether the interface is
     // exposed on the AudioPlayer or not
 
-    // Only AudioTrack supports a non-trivial playback rate
     switch (pAudioPlayer->mAndroidObjType) {
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
         pAudioPlayer->mPlaybackRate.mMinRate = AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE;
         pAudioPlayer->mPlaybackRate.mMaxRate = AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE;
+        break;
+    case AUDIOPLAYER_FROM_URIFD:
+        pAudioPlayer->mPlaybackRate.mMinRate = MEDIAPLAYER_MIN_PLAYBACKRATE_PERMILLE;
+        pAudioPlayer->mPlaybackRate.mMaxRate = MEDIAPLAYER_MAX_PLAYBACKRATE_PERMILLE;
         break;
     default:
         // use the default range
@@ -1740,10 +1746,15 @@ SLresult android_audioPlayer_setPlaybackRateAndConstraints(CAudioPlayer *ap, SLp
         }
         }
         break;
-    case AUDIOPLAYER_FROM_URIFD:
-        assert(rate == 1000);
+    case AUDIOPLAYER_FROM_URIFD: {
+        assert((MEDIAPLAYER_MIN_PLAYBACKRATE_PERMILLE <= rate) &&
+                        (rate <= MEDIAPLAYER_MAX_PLAYBACKRATE_PERMILLE));
         assert(constraints & SL_RATEPROP_NOPITCHCORAUDIO);
-        // that was easy
+        // apply the SL ES playback rate on the GenericPlayer
+        if (ap->mAPlayer != 0) {
+            ap->mAPlayer->setPlaybackRate((int16_t)rate);
+        }
+        }
         break;
 
     default:
