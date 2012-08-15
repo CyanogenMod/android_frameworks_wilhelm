@@ -110,7 +110,7 @@ static SLresult setItems(SLuint32 dataLength,
                     //SL_LOGD("Found DISCONTINUITYevent=%d", pBuff->mItems.mTsCmdData.mTsCmdCode);
                 } else if (pItems->itemSize == sizeof(SLAuint64)) {
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCON_NEWPTS;
-                    pBuff->mItems.mTsCmdData.mPts = *((SLAuint64*)pItems->itemData);
+                    memcpy(&pBuff->mItems.mTsCmdData.mPts, pItems->itemData, sizeof(SLAuint64));
                     //SL_LOGD("Found PTS=%lld", pBuff->mItems.mTsCmdData.mPts);
                 } else {
                     SL_LOGE("Invalid item parameter size %u for MPEG-2 PTS", pItems->itemSize);
@@ -124,7 +124,8 @@ static SLresult setItems(SLuint32 dataLength,
                     SL_LOGV("Received format change with no data == full format change");
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL;
                 } else if (pItems->itemSize == sizeof(SLuint32)) {
-                    XAuint32 formatData = *((XAuint32*)pItems->itemData);
+                    XAuint32 formatData;// = *((XAuint32*)pItems->itemData);
+                    memcpy(&formatData, pItems->itemData, sizeof(XAuint32));
                     // intentionally only supporting video change when reading which specific
                     //    stream has changed, interpret other changes as full change
                     if (formatData == XA_ANDROID_FORMATCHANGE_ITEMDATA_VIDEO) {
