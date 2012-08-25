@@ -52,7 +52,6 @@ ANativeWindow *getNativeWindow_()
     sp<SurfaceControl> control =
         composerClient->createSurface(
                 String8("A Surface"),
-                0,
                 1280,
                 800,
                 PIXEL_FORMAT_RGB_565,
