@@ -322,7 +322,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	$(call include-path-for, wilhelm)
+	$(call include-path-for, wilhelm) \
+	$(call include-path-for, audio-utils)
 
 LOCAL_SRC_FILES:= \
 	playbq.c
@@ -343,8 +344,7 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_playbq
 
-# commented out because libsndfile is not yet standard
-#include $(BUILD_EXECUTABLE)
+include $(BUILD_EXECUTABLE)
 
 # monkey
 

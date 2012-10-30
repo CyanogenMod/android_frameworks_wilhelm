@@ -26,7 +26,7 @@
 
 #include <SLES/OpenSLES.h>
 #ifdef ANDROID
-#include "sndfile.h"
+#include <audio_utils/sndfile.h>
 #else
 #include <sndfile.h>
 #endif
@@ -225,9 +225,6 @@ int main(int argc, char **argv)
     switch (sfinfo.format & SF_FORMAT_SUBMASK) {
     case SF_FORMAT_PCM_16:
     case SF_FORMAT_PCM_U8:
-    case SF_FORMAT_ULAW:
-    case SF_FORMAT_ALAW:
-    case SF_FORMAT_IMA_ADPCM:
         break;
     default:
         fprintf(stderr, "unsupported sub-format 0x%x\n", sfinfo.format & SF_FORMAT_SUBMASK);
