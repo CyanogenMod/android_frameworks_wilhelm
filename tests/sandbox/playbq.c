@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +31,9 @@
 #else
 #include <sndfile.h>
 #endif
+
+#include <media/nbaio/MonoPipe.h>
+#include <media/nbaio/MonoPipeReader.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -71,6 +75,10 @@ static void squeeze(const short *from, unsigned char *to, ssize_t n)
     }
 }
 
+static android::MonoPipeReader *pipeReader;
+static android::MonoPipe *pipeWriter;
+static unsigned underruns = 0;
+
 // This callback is called each time a buffer finishes playing
 
 static void callback(SLBufferQueueItf bufq, void *param)
@@ -78,11 +86,14 @@ static void callback(SLBufferQueueItf bufq, void *param)
     assert(NULL == param);
     if (!eof) {
         short *buffer = &buffers[framesPerBuffer * sfinfo.channels * which];
-        sf_count_t count;
-        count = sf_readf_short(sndfile, buffer, (sf_count_t) framesPerBuffer);
+        ssize_t count = pipeReader->read(buffer, framesPerBuffer, (int64_t) -1);
+        // on underrun from pipe, substitute silence
         if (0 >= count) {
-            eof = SL_BOOLEAN_TRUE;
-        } else {
+            memset(buffer, 0, framesPerBuffer * sfinfo.channels * sizeof(short));
+            count = framesPerBuffer;
+            ++underruns;
+        }
+        if (count > 0) {
             SLuint32 nbytes = count * sfinfo.channels * sizeof(short);
             if (byteOrder != nativeByteOrder) {
                 swab(buffer, buffer, nbytes);
@@ -98,6 +109,43 @@ static void callback(SLBufferQueueItf bufq, void *param)
         }
     }
 }
+
+// This thread reads from a (slow) filesystem with unpredictable latency and writes to pipe
+
+static void *file_reader_loop(void *arg)
+{
+#define READ_FRAMES 256
+    short *temp = (short *) malloc(READ_FRAMES * sfinfo.channels * sizeof(short));
+    sf_count_t total = 0;
+    for (;;) {
+        sf_count_t count = sf_readf_short(sndfile, temp, (sf_count_t) READ_FRAMES);
+        if (0 >= count) {
+            eof = SL_BOOLEAN_TRUE;
+            break;
+        }
+        const short *ptr = temp;
+        while (count > 0) {
+            ssize_t actual = pipeWriter->write(ptr, (size_t) count);
+            if (actual < 0) {
+                break;
+            }
+            if ((sf_count_t) actual < count) {
+                usleep(10000);
+            }
+            ptr += actual * sfinfo.channels;
+            count -= actual;
+            total += actual;
+        }
+        // simulate occasional filesystem latency
+        if ((total & 0xFF00) == 0xFF00) {
+            usleep(100000);
+        }
+    }
+    free(temp);
+    return NULL;
+}
+
+// Main program
 
 int main(int argc, char **argv)
 {
@@ -188,6 +236,9 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    // The sample rate is a lie, but it doesn't actually matter
+    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(44100, sfinfo.channels);
+
     // verify the file format
     switch (sfinfo.channels) {
     case 1:
@@ -230,6 +281,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "unsupported sub-format 0x%x\n", sfinfo.format & SF_FORMAT_SUBMASK);
         goto close_sndfile;
     }
+
+    {
 
     buffers = (short *) malloc(framesPerBuffer * sfinfo.channels * sizeof(short) * numBuffers);
 
@@ -301,6 +354,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "can't create audio player\n");
         goto no_player;
     }
+
+    {
 
     // realize the player
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
@@ -400,6 +455,24 @@ int main(int argc, char **argv)
     result = (*playerBufferQueue)->RegisterCallback(playerBufferQueue, callback, NULL);
     assert(SL_RESULT_SUCCESS == result);
 
+    pipeWriter = new android::MonoPipe(16384, nbaio_format, false /*writeCanBlock*/);
+    android::NBAIO_Format offer = nbaio_format;
+    size_t numCounterOffers = 0;
+    ssize_t neg = pipeWriter->negotiate(&offer, 1, NULL, numCounterOffers);
+    assert(0 == neg);
+    pipeReader = new android::MonoPipeReader(pipeWriter);
+    numCounterOffers = 0;
+    neg = pipeReader->negotiate(&offer, 1, NULL, numCounterOffers);
+    assert(0 == neg);
+
+    // create thread to read from file
+    pthread_t thread;
+    int ok = pthread_create(&thread, (const pthread_attr_t *) NULL, file_reader_loop, NULL);
+    assert(0 == ok);
+
+    // give thread a head start so that the pipe is initially filled
+    sleep(1);
+
     // set the player's state to playing
     result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PLAYING);
     assert(SL_RESULT_SUCCESS == result);
@@ -455,6 +528,8 @@ int main(int argc, char **argv)
     // destroy audio player
     (*playerObject)->Destroy(playerObject);
 
+    }
+
 no_player:
 
     // destroy output mix
@@ -462,6 +537,8 @@ no_player:
 
     // destroy engine
     (*engineObject)->Destroy(engineObject);
+
+    }
 
 close_sndfile:
 

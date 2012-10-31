@@ -326,10 +326,11 @@ LOCAL_C_INCLUDES:= \
 	$(call include-path-for, audio-utils)
 
 LOCAL_SRC_FILES:= \
-	playbq.c
+	playbq.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libaudioutils \
+	libnbaio \
 	libutils \
 	libOpenSLES
 
