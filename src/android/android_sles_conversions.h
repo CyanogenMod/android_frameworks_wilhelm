@@ -62,13 +62,15 @@ static inline audio_format_t sles_to_android_sampleFormat(SLuint32 pcmFormat) {
 }
 
 
-static inline audio_channel_mask_t sles_to_android_channelMaskIn(SLuint32 nbChannels, SLuint32 channelMask) {
+static inline audio_channel_mask_t sles_to_android_channelMaskIn(SLuint32 nbChannels,
+        SLuint32 channelMask) {
     // FIXME handle channel mask mapping between SL ES and Android
     return audio_channel_in_mask_from_count(nbChannels);
 }
 
 
-static inline audio_channel_mask_t sles_to_android_channelMaskOut(SLuint32 nbChannels, SLuint32 channelMask) {
+static inline audio_channel_mask_t sles_to_android_channelMaskOut(SLuint32 nbChannels,
+        SLuint32 channelMask) {
     // FIXME handle channel mask mapping between SL ES and Android
     return audio_channel_out_mask_from_count(nbChannels);
 }
