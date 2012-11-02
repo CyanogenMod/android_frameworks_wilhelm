@@ -77,8 +77,10 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
 
     {
         Mutex::Autolock _l(mLock);
-        // assert not needed because if not set, size() will be zero and the CHECK_LT will also fail
-        // assert(mBuffersHasBeenSet);
+        if (!mBuffersHasBeenSet) {
+            // no buffers available to push data to from the buffer queue, bail
+            return;
+        }
         CHECK_LT(index, mBuffers.size());
 #if 0   // enable if needed for debugging
         sp<IMemory> mem = mBuffers.itemAt(index);
