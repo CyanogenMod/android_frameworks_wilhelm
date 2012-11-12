@@ -329,6 +329,7 @@ LOCAL_SRC_FILES:= \
 	playbq.c
 
 LOCAL_SHARED_LIBRARIES := \
+	libaudioutils \
 	libutils \
 	libOpenSLES
 
