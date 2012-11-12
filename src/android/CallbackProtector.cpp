@@ -27,9 +27,9 @@ CallbackProtector::CallbackProtector() : RefBase(),
         mSafeToEnterCb(true),
         mCbCount(0)
 #ifdef USE_DEBUG
-        , mCallbackThread(NULL),
+        , mCallbackThread((pthread_t) NULL),
         mCallbackTid(0),
-        mRequesterThread(NULL),
+        mRequesterThread((pthread_t) NULL),
         mRequesterTid(0)
 #endif
 {
@@ -101,7 +101,7 @@ void CallbackProtector::exitCb() {
             mCbExitedCondition.broadcast();
         }
 #ifdef USE_DEBUG
-        mCallbackThread = NULL;
+        mCallbackThread = (pthread_t) NULL;
         mCallbackTid = 0;
 #endif
     }
