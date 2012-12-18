@@ -296,16 +296,16 @@ void GenericMediaPlayer::getPositionMsec(int* msec) {
 }
 
 //--------------------------------------------------
-void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
+void GenericMediaPlayer::setVideoSurfaceTexture(const sp<IGraphicBufferProducer> &bufferProducer) {
     SL_LOGV("GenericMediaPlayer::setVideoSurfaceTexture()");
     // FIXME bug - race condition, should do in looper
-    if (mVideoSurfaceTexture.get() == surfaceTexture.get()) {
+    if (mVideoSurfaceTexture.get() == bufferProducer.get()) {
         return;
     }
     if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
-        mPlayer->setVideoSurfaceTexture(surfaceTexture);
+        mPlayer->setVideoSurfaceTexture(bufferProducer);
     }
-    mVideoSurfaceTexture = surfaceTexture;
+    mVideoSurfaceTexture = bufferProducer;
 }
 
 //--------------------------------------------------
