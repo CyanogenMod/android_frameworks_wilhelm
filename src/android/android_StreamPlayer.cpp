@@ -385,7 +385,7 @@ void StreamPlayer::onPrepare() {
     SL_LOGD("StreamPlayer::onPrepare()");
         sp<IMediaPlayerService> mediaPlayerService(getMediaPlayerService());
         if (mediaPlayerService != NULL) {
-            mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
+            mPlayer = mediaPlayerService->create(mPlayerClient /*IMediaPlayerClient*/,
                     mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by app proxy");

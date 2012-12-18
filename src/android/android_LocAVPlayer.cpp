@@ -46,7 +46,7 @@ void LocAVPlayer::onPrepare() {
     if (mediaPlayerService != NULL) {
         switch (mDataLocatorType) {
         case kDataLocatorUri:
-            mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
+            mPlayer = mediaPlayerService->create(mPlayerClient /*IMediaPlayerClient*/,
                     mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by URI");
@@ -56,7 +56,7 @@ void LocAVPlayer::onPrepare() {
             }
             break;
         case kDataLocatorFd:
-            mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
+            mPlayer = mediaPlayerService->create(mPlayerClient /*IMediaPlayerClient*/,
                     mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by FD");
