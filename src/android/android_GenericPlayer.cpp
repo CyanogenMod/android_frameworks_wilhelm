@@ -20,6 +20,7 @@
 
 #include <media/stagefright/foundation/ADebug.h>
 #include <sys/stat.h>
+#include <inttypes.h>
 
 namespace android {
 
@@ -167,7 +168,7 @@ void GenericPlayer::stop() {
 void GenericPlayer::seek(int64_t timeMsec) {
     SL_LOGV("GenericPlayer::seek %lld", timeMsec);
     if (timeMsec < 0 && timeMsec != ANDROID_UNKNOWN_TIME) {
-        SL_LOGE("GenericPlayer::seek error, can't seek to negative time %lldms", timeMsec);
+        SL_LOGE("GenericPlayer::seek error, can't seek to negative time %" PRId64 "ms", timeMsec);
         return;
     }
     sp<AMessage> msg = new AMessage(kWhatSeek, id());

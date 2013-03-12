@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 
     set_conio_terminal_mode();
     int in_count = 0;
-    unsigned count = 0;
+    uintptr_t count = 0;
     for (;;) {
         usleep(10000);
         if (kbhit()) {
