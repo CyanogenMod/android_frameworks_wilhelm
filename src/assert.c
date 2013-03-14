@@ -19,6 +19,8 @@
 
 #include <utils/Log.h>
 
+#pragma GCC visibility push(default)
+
 void __assert(const char *file, int line, const char *failedexpr)
 {
     LOG_ALWAYS_FATAL("assertion \"%s\" failed: file \"%s\", line %d", failedexpr, file, line);
@@ -31,3 +33,5 @@ void __assert2(const char *file, int line, const char *func, const char *failede
             failedexpr, file, line, func);
     // not reached
 }
+
+#pragma GCC visibility pop
