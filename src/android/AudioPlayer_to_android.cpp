@@ -1332,9 +1332,9 @@ SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey
 static bool canUseFastTrack(CAudioPlayer *pAudioPlayer)
 {
     assert(pAudioPlayer->mAndroidObjType == AUDIOPLAYER_FROM_PCM_BUFFERQUEUE);
-    if (pAudioPlayer->mBufferQueue.mNumBuffers < 2) {
-        return false;
-    }
+
+    // no need to check the buffer queue size, application side
+    // double-buffering (and more) is not a requirement for using fast tracks
 
     // Check a blacklist of interfaces that are incompatible with fast tracks.
     // The alternative, to check a whitelist of compatible interfaces, is
