@@ -15,6 +15,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -42,6 +43,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -69,6 +71,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -99,6 +102,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -128,6 +132,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -154,6 +159,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -183,6 +189,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -213,6 +220,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -242,6 +250,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -271,6 +280,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -300,6 +310,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -332,6 +343,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libaudioutils \
 	libnbaio \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -362,6 +374,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
@@ -391,6 +404,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenMAXAL
 
 LOCAL_STATIC_LIBRARIES := \
@@ -420,6 +434,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenSLES \
 	libOpenMAXAL
 
@@ -450,6 +465,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
+	liblog \
 	libOpenMAXAL \
     libgui \
     libbinder \

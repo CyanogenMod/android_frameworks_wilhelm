@@ -175,6 +175,7 @@ LOCAL_STATIC_LIBRARIES += \
         libOpenSLESUT
 
 LOCAL_SHARED_LIBRARIES :=         \
+        liblog                    \
         libutils                  \
         libmedia                  \
         libbinder                 \
