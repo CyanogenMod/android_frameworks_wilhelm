@@ -9,7 +9,7 @@ LOCAL_CFLAGS += -I$(call include-path-for, wilhelm)
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_PRELINK_MODULE := false
-LOCAL_SHARED_LIBRARIES += libutils libOpenMAXAL libandroid
+LOCAL_SHARED_LIBRARIES += libutils liblog libOpenMAXAL libandroid
 
 
 include $(BUILD_SHARED_LIBRARY)

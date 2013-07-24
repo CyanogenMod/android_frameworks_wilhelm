@@ -175,9 +175,9 @@ LOCAL_STATIC_LIBRARIES += \
         libOpenSLESUT
 
 LOCAL_SHARED_LIBRARIES :=         \
+        liblog                    \
         libutils                  \
         libmedia                  \
-        libmedia_native           \
         libbinder                 \
         libstagefright            \
         libstagefright_foundation \

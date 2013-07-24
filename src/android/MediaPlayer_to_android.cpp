@@ -738,20 +738,12 @@ SLresult android_Player_setNativeWindow(CMediaPlayer *mp, ANativeWindow *nativeW
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         switch (value) {
-        case NATIVE_WINDOW_SURFACE: {                // Surface
+        case NATIVE_WINDOW_SURFACE: { // Surface
             SL_LOGV("Displaying on ANativeWindow of type NATIVE_WINDOW_SURFACE");
-            android::sp<android::Surface> nativeSurface(
+            android::sp<android::Surface> surface(
                     static_cast<android::Surface *>(nativeWindow));
-            mp->mAVPlayer->setVideoSurfaceTexture(
-                    nativeSurface->getSurfaceTexture());
-            result = SL_RESULT_SUCCESS;
-            } break;
-        case NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT: { // SurfaceTextureClient
-            SL_LOGV("Displaying on ANativeWindow of type NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT");
-            android::sp<android::SurfaceTextureClient> surfaceTextureClient(
-                    static_cast<android::SurfaceTextureClient *>(nativeWindow));
-            android::sp<android::ISurfaceTexture> nativeSurfaceTexture(
-                    surfaceTextureClient->getISurfaceTexture());
+            android::sp<android::IGraphicBufferProducer> nativeSurfaceTexture(
+                    surface->getIGraphicBufferProducer());
             mp->mAVPlayer->setVideoSurfaceTexture(nativeSurfaceTexture);
             result = SL_RESULT_SUCCESS;
             } break;

@@ -78,7 +78,7 @@ public:
     void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getPositionMsec(int* msec) = 0; //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
 
-    virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {}
+    virtual void setVideoSurfaceTexture(const sp<IGraphicBufferProducer> &bufferProducer) {}
 
     void setVolume(float leftVol, float rightVol);
     void attachAuxEffect(int32_t effectId);

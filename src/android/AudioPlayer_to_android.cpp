@@ -163,30 +163,6 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, CAud
     return sizeConsumed;
 }
 
-//-----------------------------------------------------------------------------
-int android_getMinFrameCount(uint32_t sampleRate) {
-    int afSampleRate;
-    if (android::AudioSystem::getOutputSamplingRate(&afSampleRate,
-            ANDROID_DEFAULT_OUTPUT_STREAM_TYPE) != android::NO_ERROR) {
-        return ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE;
-    }
-    int afFrameCount;
-    if (android::AudioSystem::getOutputFrameCount(&afFrameCount,
-            ANDROID_DEFAULT_OUTPUT_STREAM_TYPE) != android::NO_ERROR) {
-        return ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE;
-    }
-    uint32_t afLatency;
-    if (android::AudioSystem::getOutputLatency(&afLatency,
-            ANDROID_DEFAULT_OUTPUT_STREAM_TYPE) != android::NO_ERROR) {
-        return ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE;
-    }
-    // minimum nb of buffers to cover output latency, given the size of each hardware audio buffer
-    uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
-    if (minBufCount < 2) minBufCount = 2;
-    // minimum number of frames to cover output latency at the sample rate of the content
-    return (afFrameCount*sampleRate*minBufCount)/afSampleRate;
-}
-
 
 //-----------------------------------------------------------------------------
 #define LEFT_CHANNEL_MASK  0x1 << 0

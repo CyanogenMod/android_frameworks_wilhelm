@@ -20,7 +20,7 @@
 #include "android_GenericPlayer.h"
 
 #include <binder/IServiceManager.h>
-#include <gui/ISurfaceTexture.h>
+#include <gui/IGraphicBufferProducer.h>
 
 
 //--------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ public:
     // overridden from GenericPlayer
     virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
 
-    virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
+    virtual void setVideoSurfaceTexture(const sp<IGraphicBufferProducer> &bufferProducer);
 
     virtual void setPlaybackRate(int32_t ratePermille);
 
@@ -111,7 +111,7 @@ protected:
     const bool mHasVideo;   // const allows MediaPlayerNotificationClient::notify to safely access
     int32_t mSeekTimeMsec;
 
-    sp<ISurfaceTexture> mVideoSurfaceTexture;
+    sp<IGraphicBufferProducer> mVideoSurfaceTexture;
 
     // only safe to access from within Realize and looper
     sp<IMediaPlayer> mPlayer;

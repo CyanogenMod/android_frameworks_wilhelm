@@ -282,7 +282,8 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
     res = (*seekItf)->SetLoop(seekItf, SL_BOOLEAN_TRUE, 0, SL_TIME_UNKNOWN);  CheckErr(res);
 
     /* Set up marker and position callbacks */
-    res = (*playItf)->RegisterCallback(playItf, PlayEventCallback, (void *) rateItf);  CheckErr(res);
+    res = (*playItf)->RegisterCallback(playItf, PlayEventCallback, (void *) rateItf);
+            CheckErr(res);
     res = (*playItf)->SetCallbackEventsMask(playItf,
             SL_PLAYEVENT_HEADATEND | SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS);
     res = (*playItf)->SetMarkerPosition(playItf, 1500); CheckErr(res);
@@ -307,7 +308,8 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
     for (index = 0; ; ++index) {
         SLpermille minRate, maxRate, stepSize;
         SLuint32 capabilities;
-        res = (*rateItf)->GetRateRange(rateItf, index, &minRate, &maxRate, &stepSize, &capabilities);
+        res = (*rateItf)->GetRateRange(rateItf, index, &minRate, &maxRate, &stepSize,
+                &capabilities);
         if (res == SL_RESULT_PARAMETER_INVALID) {
             if (index == 0) {
                 fprintf(stderr, "implementation supports no rate ranges\n");
