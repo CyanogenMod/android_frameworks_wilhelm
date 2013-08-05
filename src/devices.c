@@ -89,7 +89,7 @@ const struct AudioOutput_id_descriptor AudioOutput_id_descriptors[] = {
 static const SLLEDDescriptor SLLEDDescriptor_default = {
     32, // ledCount
     0,  // primaryLED
-    ~0  // colorMask
+    (SLuint32) ~0   // colorMask
 };
 
 const struct LED_id_descriptor LED_id_descriptors[] = {
@@ -169,7 +169,7 @@ static const SLAudioCodecDescriptor CodecDescriptor_A = {
     sizeof(SamplingRates_A) / sizeof(SamplingRates_A[0]),
                          // numSampleRatesSupported
     1,                   // minBitRate
-    ~0,                  // maxBitRate
+    (SLuint32) ~0,       // maxBitRate
     SL_BOOLEAN_TRUE,     // isBitrateRangeContinuous
     NULL,                // pBitratesSupported
     0,                   // numBitratesSupported

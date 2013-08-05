@@ -373,7 +373,7 @@ int main(int argc, char **argv)
 
     // get the playback rate interface and configure the rate
     SLPlaybackRateItf playerPlaybackRate;
-    SLpermille currentRate;
+    SLpermille currentRate = 0;
     if (enablePlaybackRate) {
         result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAYBACKRATE,
                 &playerPlaybackRate);
