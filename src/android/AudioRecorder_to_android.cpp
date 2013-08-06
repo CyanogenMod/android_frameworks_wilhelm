@@ -393,6 +393,9 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
     SL_LOGV("new AudioRecord %u channels, %u mHz", ar->mNumChannels, ar->mSampleRateMilliHz);
 
+    // currently nothing analogous to canUseFastTrack() for recording
+    audio_input_flags_t policy = AUDIO_INPUT_FLAG_FAST;
+
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord();
     ar->mAudioRecord->set(ar->mRecordSource, // source
@@ -404,8 +407,12 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
             audioRecorder_callback,// callback_t
             (void*)ar,             // user, callback data, here the AudioRecorder
             0,                     // notificationFrames
-            false);                // threadCanCallJava, note: this will prevent direct Java
+            false,                 // threadCanCallJava, note: this will prevent direct Java
                                    //   callbacks, but we don't want them in the recording loop
+            0,                     // session ID
+            android::AudioRecord::TRANSFER_CALLBACK,
+                                   // transfer type
+            policy);               // audio_input_flags_t
 
     if (android::NO_ERROR != ar->mAudioRecord->initCheck()) {
         SL_LOGE("android_audioRecorder_realize(%p) error creating AudioRecord object", ar);
