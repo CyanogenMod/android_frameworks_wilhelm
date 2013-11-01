@@ -147,9 +147,10 @@
     SLuint32 mSampleRateMilliHz;// initially UNKNOWN_SAMPLERATE, then const once it is known
     // implementation-specific data for this instance
 #ifdef ANDROID
+    // FIXME consolidate the next several variables into ARecorder class to avoid placement new
     enum AndroidObjectType mAndroidObjType;
-    android::AudioRecord *mAudioRecord; //FIXME candidate to be encapsulated in a ARecorder subclass
-    audio_source_t mRecordSource;       //FIXME candidate to be encapsulated in a ARecorder subclass
+    android::sp<android::AudioRecord> mAudioRecord;
+    audio_source_t mRecordSource;
 #endif
 } /*CAudioRecorder*/;
 

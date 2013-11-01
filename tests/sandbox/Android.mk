@@ -75,7 +75,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -106,7 +107,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -163,7 +165,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -193,7 +196,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -224,7 +228,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -254,7 +259,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -284,7 +290,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -314,7 +321,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -348,7 +356,8 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := \
     libOpenSLESUT \
-    libsndfile
+    libsndfile \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -378,7 +387,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -408,7 +418,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenMAXAL
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -439,7 +450,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenMAXAL
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -472,7 +484,8 @@ LOCAL_SHARED_LIBRARIES := \
     libandroid
 
 LOCAL_STATIC_LIBRARIES := \
-    libOpenSLESUT
+    libOpenSLESUT \
+    liblog
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX

@@ -449,7 +449,10 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
                     thiz->mSampleRateMilliHz = UNKNOWN_SAMPLERATE;
 #ifdef ANDROID
-                    thiz->mAudioRecord = NULL;
+                    // placement new (explicit constructor)
+                    // FIXME unnecessary once those fields are encapsulated in one class, rather
+                    //   than a structure
+                    (void) new (&thiz->mAudioRecord) android::sp<android::AudioRecord>();
                     thiz->mRecordSource = AUDIO_SOURCE_DEFAULT;
 #endif
 

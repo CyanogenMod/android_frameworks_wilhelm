@@ -31,7 +31,8 @@ static const char *kVideoMimeTypes[] = {
         MEDIA_MIMETYPE_VIDEO_H263,
         MEDIA_MIMETYPE_VIDEO_MPEG4,
         MEDIA_MIMETYPE_VIDEO_AVC,
-        MEDIA_MIMETYPE_VIDEO_VPX
+        MEDIA_MIMETYPE_VIDEO_VP8,
+        MEDIA_MIMETYPE_VIDEO_VP9
 };
 // must == kMaxVideoDecoders
 static const size_t kNbVideoMimeTypes = sizeof(kVideoMimeTypes) / sizeof(kVideoMimeTypes[0]);

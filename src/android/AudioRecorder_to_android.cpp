@@ -61,7 +61,7 @@ SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
     }
 
     // recording preset needs to be set before the object is realized
-    // (ap->mAudioRecord is supposed to be NULL until then)
+    // (ap->mAudioRecord is supposed to be 0 until then)
     if (SL_OBJECT_STATE_UNREALIZED != ar->mObject.mState) {
         SL_LOGE(ERROR_RECORDERPRESET_REALIZED);
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
@@ -311,7 +311,7 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
             (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE == sinkLocatorType)) {
         // microphone to simple buffer queue
         ar->mAndroidObjType = AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE;
-        ar->mAudioRecord = NULL;
+        ar->mAudioRecord.clear();
         ar->mRecordSource = AUDIO_SOURCE_DEFAULT;
     } else {
         result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -393,6 +393,9 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
     SL_LOGV("new AudioRecord %u channels, %u mHz", ar->mNumChannels, ar->mSampleRateMilliHz);
 
+    // currently nothing analogous to canUseFastTrack() for recording
+    audio_input_flags_t policy = AUDIO_INPUT_FLAG_FAST;
+
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord();
     ar->mAudioRecord->set(ar->mRecordSource, // source
@@ -404,8 +407,12 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
             audioRecorder_callback,// callback_t
             (void*)ar,             // user, callback data, here the AudioRecorder
             0,                     // notificationFrames
-            false);                // threadCanCallJava, note: this will prevent direct Java
+            false,                 // threadCanCallJava, note: this will prevent direct Java
                                    //   callbacks, but we don't want them in the recording loop
+            0,                     // session ID
+            android::AudioRecord::TRANSFER_CALLBACK,
+                                   // transfer type
+            policy);               // audio_input_flags_t
 
     if (android::NO_ERROR != ar->mAudioRecord->initCheck()) {
         SL_LOGE("android_audioRecorder_realize(%p) error creating AudioRecord object", ar);
@@ -426,11 +433,11 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 void android_audioRecorder_destroy(CAudioRecorder* ar) {
     SL_LOGV("android_audioRecorder_destroy(%p) entering", ar);
 
-    if (NULL != ar->mAudioRecord) {
+    if (ar->mAudioRecord != 0) {
         ar->mAudioRecord->stop();
-        delete ar->mAudioRecord;
-        ar->mAudioRecord = NULL;
     }
+    // explicit destructor
+    ar->mAudioRecord.~sp();
 
 #ifdef MONITOR_RECORDING
     if (NULL != gMonitorFp) {
@@ -445,7 +452,7 @@ void android_audioRecorder_destroy(CAudioRecorder* ar) {
 void android_audioRecorder_setRecordState(CAudioRecorder* ar, SLuint32 state) {
     SL_LOGV("android_audioRecorder_setRecordState(%p, %u) entering", ar, state);
 
-    if (NULL == ar->mAudioRecord) {
+    if (ar->mAudioRecord == 0) {
         return;
     }
 
@@ -474,7 +481,7 @@ void android_audioRecorder_useRecordEventMask(CAudioRecorder *ar) {
     IRecord *pRecordItf = &ar->mRecord;
     SLuint32 eventFlags = pRecordItf->mCallbackEventsMask;
 
-    if (NULL == ar->mAudioRecord) {
+    if (ar->mAudioRecord == 0) {
         return;
     }
 
@@ -524,7 +531,7 @@ void android_audioRecorder_useRecordEventMask(CAudioRecorder *ar) {
 
 //-----------------------------------------------------------------------------
 void android_audioRecorder_getPosition(CAudioRecorder *ar, SLmillisecond *pPosMsec) {
-    if ((NULL == ar) || (NULL == ar->mAudioRecord)) {
+    if ((NULL == ar) || (ar->mAudioRecord == 0)) {
         *pPosMsec = 0;
     } else {
         uint32_t positionInFrames;
