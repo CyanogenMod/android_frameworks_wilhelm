@@ -138,7 +138,7 @@ void RecBufferQueueCallback(
 
 //-----------------------------------------------------------------
 
-/* Play an audio path by opening a file descriptor on that path  */
+/* Record to an audio path by opening a file descriptor on that path  */
 void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSeconds)
 {
     gFp = fopen(path, "w");
