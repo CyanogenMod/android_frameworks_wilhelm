@@ -162,6 +162,7 @@ LOCAL_C_INCLUDES:=                                                  \
         $(call include-path-for, wilhelm)                           \
         frameworks/av/media/libstagefright                        \
         frameworks/av/media/libstagefright/include                \
+        frameworks/av/media/libstagefright/http                     \
         frameworks/native/include/media/openmax                     \
         $(call include-path-for, audio-effects)
 
@@ -181,6 +182,7 @@ LOCAL_SHARED_LIBRARIES :=         \
         libbinder                 \
         libstagefright            \
         libstagefright_foundation \
+        libstagefright_http_support \
         libcutils                 \
         libgui                    \
         libdl

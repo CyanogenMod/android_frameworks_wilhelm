@@ -17,9 +17,13 @@
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
+
+#include <media/IMediaHTTPService.h>
 #include <media/IMediaPlayerService.h>
+
 #include "android_LocAVPlayer.h"
 
+#include "HTTPHelper.h"
 
 namespace android {
 
@@ -50,7 +54,10 @@ void LocAVPlayer::onPrepare() {
                     mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by URI");
-            } else if (mPlayer->setDataSource(mDataLocator.uriRef, NULL /*headers*/) != NO_ERROR) {
+            } else if (mPlayer->setDataSource(
+                        CreateHTTPServiceInCurrentJavaContext(),
+                        mDataLocator.uriRef,
+                        NULL /*headers*/) != NO_ERROR) {
                 SL_LOGE("setDataSource failed");
                 mPlayer.clear();
             }

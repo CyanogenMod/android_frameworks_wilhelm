@@ -20,6 +20,7 @@
 #include "android/android_AudioSfDecoder.h"
 
 #include <binder/IServiceManager.h>
+#include <media/IMediaHTTPService.h>
 #include <media/stagefright/foundation/ADebug.h>
 
 
@@ -189,7 +190,8 @@ void AudioSfDecoder::onPrepare() {
         return;
 
     case kDataLocatorUri:
-        dataSource = DataSource::CreateFromURI(mDataLocator.uriRef);
+        dataSource = DataSource::CreateFromURI(
+                NULL /* XXX httpService */, mDataLocator.uriRef);
         if (dataSource == NULL) {
             SL_LOGE("AudioSfDecoder::onPrepare(): Error opening %s", mDataLocator.uriRef);
             notifyPrepared(MEDIA_ERROR_BASE);
