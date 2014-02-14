@@ -212,7 +212,7 @@ XAresult bufferQueueCallback(
             XAmillisecond position;
             result = (*playerPlay)->GetPosition(playerPlay, &position);
             assert(XA_RESULT_SUCCESS == result);
-            printf("Position after enqueueing packet %u: %u ms\n", curPacket, position);
+            printf("Position after enqueueing packet %zu: %u ms\n", curPacket, position);
         }
     }
     if (forceCallbackFailure && (curPacket % 1230 == 0)) {
@@ -482,7 +482,7 @@ int main(int argc, char **argv)
             result = (*playerAndroidBufferQueue)->Enqueue(playerAndroidBufferQueue, NULL,
                     &packets[curPacket], MPEG2TS_PACKET_SIZE * packetsThisBuffer, NULL, 0);
             if (XA_RESULT_BUFFER_INSUFFICIENT == result) {
-                printf("Enqueued initial %u packets in %u buffers\n", curPacket - firstPacket,
+                printf("Enqueued initial %zu packets in %zu buffers\n", curPacket - firstPacket,
                         (curPacket - firstPacket + PACKETS_PER_BUFFER - 1) / PACKETS_PER_BUFFER);
                 break;
             }

@@ -263,7 +263,7 @@ SLresult AndroidBufferQueueCallback(
         }
     } else if (filelen == 0) {
         // signal EOS to the decoder rather than just starving it
-        printf("Enqueue EOS: encoded frames=%u, decoded frames=%u\n", encodedFrames, decodedFrames);
+        printf("Enqueue EOS: encoded frames=%zu, decoded frames=%zu\n", encodedFrames, decodedFrames);
         printf("You should now see %u ADTS completion%s followed by 1 EOS completion\n",
                 NB_BUFFERS_IN_ADTS_QUEUE - 1, NB_BUFFERS_IN_ADTS_QUEUE != 2 ? "s" : "");
         SLAndroidBufferItem msgEos;
@@ -296,13 +296,13 @@ SLresult AndroidBufferQueueCallback(
             frameStats.sample(framelen);
         } else {
             fprintf(stderr,
-                    "partial ADTS frame at EOF discarded; offset=%u, framelen=%u, filelen=%u\n",
+                    "partial ADTS frame at EOF discarded; offset=%zu, framelen=%u, filelen=%zu\n",
                     frame - (unsigned char *) ptr, framelen, filelen);
             frame += filelen;
             filelen = 0;
         }
     } else {
-        fprintf(stderr, "corrupt ADTS frame encountered; offset=%u, filelen=%u\n",
+        fprintf(stderr, "corrupt ADTS frame encountered; offset=%zu, filelen=%zu\n",
                 frame - (unsigned char *) ptr, filelen);
         frame += filelen;
         filelen = 0;
@@ -391,11 +391,11 @@ void DecPlayCallback(
         res = (*pCntxt->playItf)->GetDuration(pCntxt->playItf, &duration);
         ExitOnError(res);
         if (duration == SL_TIME_UNKNOWN) {
-            printf("After %u encoded %u decoded frames: position is %u ms, duration is "
+            printf("After %zu encoded %zu decoded frames: position is %u ms, duration is "
                     "unknown as expected\n",
                     encodedFrames, decodedFrames, position);
         } else {
-            printf("After %u encoded %u decoded frames: position is %u ms, duration is "
+            printf("After %zu encoded %zu decoded frames: position is %u ms, duration is "
                     "surprisingly %u ms\n",
                     encodedFrames, decodedFrames, position, duration);
         }
@@ -780,7 +780,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
         if (pauseFrame > 0) {
             if (decodedFrames >= pauseFrame) {
                 pauseFrame = 0;
-                printf("Pausing after decoded frame %u for 10 seconds\n", decodedFrames);
+                printf("Pausing after decoded frame %zu for 10 seconds\n", decodedFrames);
                 pthread_mutex_unlock(&eosLock);
                 res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PAUSED);
                 ExitOnError(res);
@@ -810,9 +810,9 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     printf("Decode is now finished\n");
 
     pthread_mutex_lock(&eosLock);
-    printf("Frame counters: encoded=%u decoded=%u\n", encodedFrames, decodedFrames);
-    printf("Sample counters: encoded=%u decoded=%u\n", encodedSamples, decodedSamples);
-    printf("Total encode completions received: actual=%u, expected=%u\n",
+    printf("Frame counters: encoded=%zu decoded=%zu\n", encodedFrames, decodedFrames);
+    printf("Sample counters: encoded=%zu decoded=%zu\n", encodedSamples, decodedSamples);
+    printf("Total encode completions received: actual=%zu, expected=%zu\n",
             totalEncodeCompletions, encodedFrames+1/*EOS*/);
     pthread_mutex_unlock(&eosLock);
 
