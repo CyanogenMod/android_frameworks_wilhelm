@@ -79,7 +79,7 @@ static size_t getFrameSize(const sp<DataSource> &source, off64_t offset) {
     static const size_t kAdtsHeaderLengthWithCrc = 9;
     size_t headSize = protectionAbsent ? kAdtsHeaderLengthNoCrc : kAdtsHeaderLengthWithCrc;
     if (headSize > frameSize) {
-        SL_LOGE("AacAdtsExtractor:: getFrameSize() returns 0 (frameSize %u < headSize %u)",
+        SL_LOGE("AacAdtsExtractor:: getFrameSize() returns 0 (frameSize %zu < headSize %zu)",
                 frameSize, headSize);
         return 0;
     }

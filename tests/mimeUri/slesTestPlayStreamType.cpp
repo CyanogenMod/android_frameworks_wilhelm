@@ -196,7 +196,7 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
             SL_ANDROID_KEY_STREAM_TYPE, &valueSize, NULL);
     ExitOnError(result);
     if (valueSize != sizeof(SLint32)) {
-        fprintf(stderr, "ERROR: size for stream type is %u, should be %u\n",
+        fprintf(stderr, "ERROR: size for stream type is %u, should be %zu\n",
                 valueSize, sizeof(SLint32));
     }
     result = (*configItf)->GetConfiguration(configItf,
