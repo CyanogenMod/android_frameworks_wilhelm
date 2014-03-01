@@ -36,4 +36,4 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativetest
 include $(BUILD_EXECUTABLE)
 
 # Build the manual test programs.
-include $(call all-subdir-makefiles)
+include $(call all-makefiles-under,$(LOCAL_PATH))
