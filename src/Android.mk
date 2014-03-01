@@ -189,6 +189,7 @@ LOCAL_SHARED_LIBRARIES :=         \
 
 LOCAL_MODULE := libwilhelm
 LOCAL_MODULE_TAGS := optional
+LOCAL_32_BIT_ONLY := true
 
 ifeq ($(TARGET_BUILD_VARIANT),userdebug)
         LOCAL_CFLAGS += -DUSERDEBUG_BUILD=1
@@ -207,6 +208,7 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_MODULE := libOpenSLES
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
+LOCAL_32_BIT_ONLY := true
 LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DSL_API='__attribute__((visibility("default")))'
 LOCAL_SHARED_LIBRARIES := libwilhelm liblog
@@ -222,6 +224,7 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_MODULE := libOpenMAXAL
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
+LOCAL_32_BIT_ONLY := true
 LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DXA_API='__attribute__((visibility("default")))'
 LOCAL_SHARED_LIBRARIES := libwilhelm liblog
