@@ -31,6 +31,17 @@
 /** \brief Exclusively lock an object */
 
 #ifdef USE_DEBUG
+
+void init_time_spec(timespec* ts, long delta) {
+    clock_gettime(CLOCK_REALTIME, ts);
+    ts->tv_nsec += delta;
+
+    if (ts->tv_nsec >= 1000000000L) {
+        ts->tv_sec++;
+        ts->tv_nsec -= 1000000000L;
+    }
+}
+
 void object_lock_exclusive_(IObject *thiz, const char *file, int line)
 {
     int ok;
@@ -39,11 +50,14 @@ void object_lock_exclusive_(IObject *thiz, const char *file, int line)
         // not android_atomic_acquire_load because we don't care about relative load/load ordering
         int32_t oldGeneration = thiz->mGeneration;
         // wait up to a total of 250 ms
-        static const unsigned backoffs[] = {10, 20, 30, 40, 50, 100};
+        static const long nanoBackoffs[] = {
+            10 * 1000000, 20 * 1000000, 30 * 1000000, 40 * 1000000, 50 * 1000000, 100 * 1000000};
         unsigned i = 0;
+        timespec ts;
+        memset(&ts, 0, sizeof(timespec));
         for (;;) {
-            // the Android version is in ms not timespec, and isn't named pthread_mutex_timedlock_np
-            ok = pthread_mutex_lock_timeout_np(&thiz->mMutex, backoffs[i]);
+            init_time_spec(&ts, nanoBackoffs[i]);
+            ok = pthread_mutex_timedlock(&thiz->mMutex, &ts);
             if (0 == ok) {
                 break;
             }
@@ -63,7 +77,7 @@ void object_lock_exclusive_(IObject *thiz, const char *file, int line)
                 goto forward_progress;
             }
             // no, then continue trying to lock but with increasing timeouts
-            if (++i >= (sizeof(backoffs) / sizeof(backoffs[0]))) {
+            if (++i >= (sizeof(nanoBackoffs) / sizeof(nanoBackoffs[0]))) {
                 // the extra block avoids a C++ compiler error about goto past initialization
                 {
                     pthread_t me = pthread_self();
