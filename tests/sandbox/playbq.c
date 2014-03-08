@@ -237,7 +237,8 @@ int main(int argc, char **argv)
     }
 
     // The sample rate is a lie, but it doesn't actually matter
-    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(44100, sfinfo.channels);
+    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(44100, sfinfo.channels,
+            AUDIO_FORMAT_PCM_16_BIT);
 
     // verify the file format
     switch (sfinfo.channels) {
