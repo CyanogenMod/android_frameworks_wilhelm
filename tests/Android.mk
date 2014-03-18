@@ -32,6 +32,7 @@ $(foreach file,$(test_src_files), \
     $(eval LOCAL_MODULE := libopenslestests) \
     $(eval LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativetest) \
     $(eval LOCAL_MODULE_TAGS := $(module_tags)) \
+    $(eval LOCAL_32_BIT_ONLY := true) \
     $(eval include $(BUILD_EXECUTABLE)) \
 )
 

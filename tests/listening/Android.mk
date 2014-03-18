@@ -22,6 +22,8 @@ endif
 
 LOCAL_MODULE:= slesTest_seekTorture
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 #
@@ -45,5 +47,7 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_playMuteSolo
+
+LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)

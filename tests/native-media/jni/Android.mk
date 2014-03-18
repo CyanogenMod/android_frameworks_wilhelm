@@ -11,5 +11,6 @@ LOCAL_CFLAGS += -UNDEBUG
 LOCAL_PRELINK_MODULE := false
 LOCAL_SHARED_LIBRARIES += libutils liblog libOpenMAXAL libandroid
 
+LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_SHARED_LIBRARY)
