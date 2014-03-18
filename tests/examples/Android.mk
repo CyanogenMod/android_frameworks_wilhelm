@@ -22,6 +22,8 @@ endif
 
 LOCAL_MODULE:= slesTest_recBuffQueue
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_playFdPath
@@ -45,6 +47,8 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_playFdPath
+
+LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -73,6 +77,8 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_feedback
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_sawtoothBufferQueue
@@ -98,6 +104,8 @@ endif
 
 LOCAL_MODULE:= slesTest_sawtoothBufferQueue
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_eqFdPath
@@ -119,6 +127,8 @@ LOCAL_SHARED_LIBRARIES := \
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
+
+LOCAL_32_BIT_ONLY := true
 
 LOCAL_MODULE:= slesTest_eqFdPath
 
@@ -146,6 +156,8 @@ endif
 
 LOCAL_MODULE:= slesTest_eqOutputPath
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_bassboostPath
@@ -170,6 +182,8 @@ endif
 
 LOCAL_MODULE:= slesTest_bassboostPath
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_virtualizer
@@ -191,6 +205,8 @@ LOCAL_SHARED_LIBRARIES := \
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
+
+LOCAL_32_BIT_ONLY := true
 
 LOCAL_MODULE:= slesTest_virtualizer
 
@@ -218,6 +234,8 @@ endif
 
 LOCAL_MODULE:= slesTest_effectCapabilities
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_sendToPresetReverb
@@ -242,6 +260,8 @@ endif
 
 LOCAL_MODULE:= slesTest_sendToPresetReverb
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_decodeToBuffQueue
@@ -265,6 +285,8 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_decodeToBuffQueue
+
+LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -295,6 +317,8 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_decodeAac
 
+LOCAL_32_BIT_ONLY := true
+
 include $(BUILD_EXECUTABLE)
 
 #######################################
@@ -321,5 +345,7 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= xaVideoDecoderCapabilities
+
+LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
