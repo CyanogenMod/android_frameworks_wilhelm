@@ -33,8 +33,6 @@ LOCAL_MODULE:= BufferQueue_test
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativetest
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # Build the manual test programs.
