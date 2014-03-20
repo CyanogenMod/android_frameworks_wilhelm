@@ -24,8 +24,6 @@ endif
 
 LOCAL_MODULE:= slesTest_playStates
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # slesTest_playStreamType
@@ -51,8 +49,6 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_playStreamType
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -80,8 +76,6 @@ endif
 
 LOCAL_MODULE:= slesTest_playUri
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # slesTest_loopUri
@@ -107,8 +101,6 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_loopUri
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -136,8 +128,6 @@ endif
 
 LOCAL_MODULE:= slesTest_playUri2
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # slesTest_slowDownUri
@@ -163,8 +153,6 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_slowDownUri
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -192,8 +180,6 @@ endif
 
 LOCAL_MODULE:= slesTest_manyPlayers
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # slesTest_getPositionUri
@@ -219,7 +205,5 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_getPositionUri
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
