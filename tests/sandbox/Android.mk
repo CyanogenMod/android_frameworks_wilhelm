@@ -27,8 +27,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_intbufq
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # multiplay
@@ -55,8 +53,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_multiplay
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -90,8 +86,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_engine
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # object
@@ -124,8 +118,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_object
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # configbq
@@ -152,8 +144,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_configbq
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -186,8 +176,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_reverb
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # srcsink
@@ -218,8 +206,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_srcsink
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -253,8 +239,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_outputmix
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # urimime
@@ -285,8 +269,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_urimime
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -319,8 +301,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_dim
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # multithread
@@ -351,8 +331,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_multithread
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -389,8 +367,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_playbq
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # monkey
@@ -421,8 +397,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_monkey
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -455,8 +429,6 @@ LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_xa
 
-LOCAL_32_BIT_ONLY := true
-
 include $(BUILD_EXECUTABLE)
 
 # dual
@@ -488,8 +460,6 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_dual
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
 
@@ -524,7 +494,5 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= xaplay
-
-LOCAL_32_BIT_ONLY := true
 
 include $(BUILD_EXECUTABLE)
