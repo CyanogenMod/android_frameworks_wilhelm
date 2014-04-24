@@ -59,5 +59,9 @@ void CAudioRecorder_Destroy(void *self)
 
 predestroy_t CAudioRecorder_PreDestroy(void *self)
 {
+    CAudioRecorder *thiz = (CAudioRecorder *) self;
+#ifdef ANDROID
+    android_audioRecorder_preDestroy(thiz);
+#endif
     return predestroy_ok;
 }

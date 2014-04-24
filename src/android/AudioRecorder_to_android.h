@@ -45,6 +45,8 @@ extern SLresult android_audioRecorder_getConfig(CAudioRecorder* ar, const SLchar
 
 extern SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async);
 
+extern void android_audioRecorder_preDestroy(CAudioRecorder* ar);
+
 extern void android_audioRecorder_destroy(CAudioRecorder* ar);
 
 /**************************************************************************************************
