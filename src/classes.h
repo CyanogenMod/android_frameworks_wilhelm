@@ -153,6 +153,7 @@
     // FIXME consolidate the next several variables into ARecorder class to avoid placement new
     enum AndroidObjectType mAndroidObjType;
     android::sp<android::AudioRecord> mAudioRecord;
+    android::sp<android::CallbackProtector> mCallbackProtector;
     audio_source_t mRecordSource;
 #endif
 } /*CAudioRecorder*/;
