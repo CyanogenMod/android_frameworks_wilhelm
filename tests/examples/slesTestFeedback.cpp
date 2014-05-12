@@ -33,7 +33,7 @@
 // default values
 static SLuint32 rxBufCount = 2;     // -r#
 static SLuint32 txBufCount = 2;     // -t#
-static SLuint32 bufSizeInFrames = 512;  // -f#
+static SLuint32 bufSizeInFrames = 256;  // -f#
 static SLuint32 channels = 1;       // -c#
 static SLuint32 sampleRate = 44100; // -s#
 static SLuint32 exitAfterSeconds = 60; // -e#
