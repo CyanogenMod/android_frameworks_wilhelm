@@ -854,6 +854,60 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
     ap->mCallbackProtector->exitCb();
 }
 
+// From EffectDownmix.h
+const uint32_t kSides = AUDIO_CHANNEL_OUT_SIDE_LEFT | AUDIO_CHANNEL_OUT_SIDE_RIGHT;
+const uint32_t kBacks = AUDIO_CHANNEL_OUT_BACK_LEFT | AUDIO_CHANNEL_OUT_BACK_RIGHT;
+const uint32_t kUnsupported =
+        AUDIO_CHANNEL_OUT_FRONT_LEFT_OF_CENTER | AUDIO_CHANNEL_OUT_FRONT_RIGHT_OF_CENTER |
+        AUDIO_CHANNEL_OUT_TOP_CENTER |
+        AUDIO_CHANNEL_OUT_TOP_FRONT_LEFT |
+        AUDIO_CHANNEL_OUT_TOP_FRONT_CENTER |
+        AUDIO_CHANNEL_OUT_TOP_FRONT_RIGHT |
+        AUDIO_CHANNEL_OUT_TOP_BACK_LEFT |
+        AUDIO_CHANNEL_OUT_TOP_BACK_CENTER |
+        AUDIO_CHANNEL_OUT_TOP_BACK_RIGHT;
+
+//TODO(pmclean) This will need to be revisited when arbitrary N-channel support is added.
+SLresult android_audioPlayer_validateChannelMask(uint32_t mask, int numChans) {
+    // Check that the number of channels falls within bounds.
+    if (numChans < 0 || numChans > 8) {
+        return SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+    // Are there the right number of channels in the mask?
+    if (popcount(mask) != numChans) {
+        return SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+    // check against unsupported channels
+    if (mask & kUnsupported) {
+        ALOGE("Unsupported channels (top or front left/right of center)");
+        return SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+    // verify has FL/FR
+    if ((mask & AUDIO_CHANNEL_OUT_STEREO) != AUDIO_CHANNEL_OUT_STEREO) {
+        ALOGE("Front channels must be present");
+        return SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+    // verify uses SIDE as a pair (ok if not using SIDE at all)
+    bool hasSides = false;
+    if ((mask & kSides) != 0) {
+        if ((mask & kSides) != kSides) {
+            ALOGE("Side channels must be used as a pair");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
+        hasSides = true;
+    }
+    // verify uses BACK as a pair (ok if not using BACK at all)
+    bool hasBacks = false;
+    if ((mask & kBacks) != 0) {
+        if ((mask & kBacks) != kBacks) {
+            ALOGE("Back channels must be used as a pair");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
+        hasBacks = true;
+    }
+
+    return SL_RESULT_SUCCESS;
+}
 
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
@@ -886,16 +940,14 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         //     currently only PCM buffer queues are supported,
         case SL_DATAFORMAT_PCM: {
             SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
-            switch (df_pcm->numChannels) {
-            case 1:
-            case 2:
-                break;
-            default:
-                // this should have already been rejected by checkDataFormat
-                SL_LOGE("Cannot create audio player: unsupported " \
-                    "PCM data source with %u channels", (unsigned) df_pcm->numChannels);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
+            SLresult result = android_audioPlayer_validateChannelMask(df_pcm->channelMask,
+                                                                      df_pcm->numChannels);
+            if (result != SL_RESULT_SUCCESS) {
+                SL_LOGE("Cannot create audio player: unsupported PCM data source with %u channels",
+                        (unsigned) df_pcm->numChannels);
+                return result;
             }
+
             switch (df_pcm->samplesPerSec) {
             case SL_SAMPLINGRATE_8:
             case SL_SAMPLINGRATE_11_025:
@@ -919,6 +971,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
             case SL_PCMSAMPLEFORMAT_FIXED_16:
+            case SL_PCMSAMPLEFORMAT_FIXED_24:
                 break;
                 // others
             default:
@@ -930,6 +983,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             switch (df_pcm->containerSize) {
             case 8:
             case 16:
+            case 24:
                 break;
                 // others
             default:

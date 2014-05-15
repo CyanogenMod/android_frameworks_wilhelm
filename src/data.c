@@ -332,6 +332,15 @@ static void freeDataLocator(DataLocator *pDataLocator)
 
 
 /** \brief Check a data format and make local deep copy */
+#define SL_ANDROID_SPEAKER_QUAD (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT \
+ | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT)
+
+#define SL_ANDROID_SPEAKER_5DOT1 (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT \
+ | SL_SPEAKER_FRONT_CENTER  | SL_SPEAKER_LOW_FREQUENCY| SL_SPEAKER_BACK_LEFT \
+ | SL_SPEAKER_BACK_RIGHT)
+
+#define SL_ANDROID_SPEAKER_7DOT1 (SL_ANDROID_SPEAKER_5DOT1 | SL_SPEAKER_SIDE_LEFT \
+ |SL_SPEAKER_SIDE_RIGHT)
 
 static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDataFormat,
         SLuint32 allowedDataFormatMask)
@@ -354,6 +363,9 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 switch (pDataFormat->mPCM.numChannels) {
                 case 1:     // mono
                 case 2:     // stereo
+                case 4:     // QUAD
+                case 6:     // 5.1
+                case 8:     // 8.1
                     break;
                 case 0:     // unknown
                     result = SL_RESULT_PARAMETER_INVALID;
@@ -399,9 +411,9 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 switch (pDataFormat->mPCM.bitsPerSample) {
                 case SL_PCMSAMPLEFORMAT_FIXED_8:
                 case SL_PCMSAMPLEFORMAT_FIXED_16:
+                case SL_PCMSAMPLEFORMAT_FIXED_24:
                     break;
                 case SL_PCMSAMPLEFORMAT_FIXED_20:
-                case SL_PCMSAMPLEFORMAT_FIXED_24:
                 case SL_PCMSAMPLEFORMAT_FIXED_28:
                 case SL_PCMSAMPLEFORMAT_FIXED_32:
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -439,6 +451,21 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 case SL_SPEAKER_FRONT_RIGHT:
                 case SL_SPEAKER_FRONT_CENTER:
                     if (1 != pDataFormat->mPCM.numChannels) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
+                case SL_ANDROID_SPEAKER_QUAD:
+                    if (4 != pDataFormat->mPCM.numChannels) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
+                case SL_ANDROID_SPEAKER_5DOT1:
+                    if (6 != pDataFormat->mPCM.numChannels) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
+                case SL_ANDROID_SPEAKER_7DOT1:
+                    if (8 != pDataFormat->mPCM.numChannels) {
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
