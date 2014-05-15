@@ -4,6 +4,11 @@ You need to do this after modifying either OpenSLES_IID.c or MPH.c.
 Prerequisites:
  * GNU make
  * GNU gperf perfect hash generator
+   $ gperf --version
+   GNU gperf 3.0.3
+ * GNU sed
+   $ sed --version
+   GNU sed version 4.2.1
 
 Usage:
 Type 'make'.

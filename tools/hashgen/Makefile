@@ -37,7 +37,7 @@ part7.c : part23in.c hash.sed
 # part8.c is human_generated
 
 part23in.c : part23in.gperf
-	gperf --null-strings --readonly-tables --compare-lengths part23in.gperf > part23in.c
+	gperf --null-strings --readonly-tables --no-strlen part23in.gperf > part23in.c
 
 part23in.gperf : frag1
 	./frag1 > part23in.gperf
