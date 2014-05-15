@@ -158,7 +158,7 @@ int main(int arg, char **argv)
 #ifdef ANDROID
     // whereas the implementation uses PLATFORM_SDK_VERSION, use a hard-coded value here
     // so that we're actually testing for a particular expected value
-    supportedExt = (SLchar *) "ANDROID_SDK_LEVEL_13";
+    supportedExt = (SLchar *) "ANDROID_SDK_LEVEL_19";
 #else
     supportedExt = (SLchar *) "WILHELM_DESKTOP";
 #endif
