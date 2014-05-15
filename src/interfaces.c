@@ -123,6 +123,11 @@ const char * const interface_names[MPH_MAX] = {
     "XAVIDEOPOSTPROCESSING",
     "XAVOLUME",
 
+    // Android API level 20 extended interfaces
+    "ANDROIDACOUSTICECHOCANCELLATION",
+    "ANDROIDAUTOMATICGAINCONTROL",
+    "ANDROIDNOISESUPPRESSION",
+
 };
 
 

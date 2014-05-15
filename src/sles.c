@@ -237,6 +237,8 @@ extern void
     I3DLocation_init(void *),
     I3DMacroscopic_init(void *),
     I3DSource_init(void *),
+    IAndroidAcousticEchoCancellation_init(void *),
+    IAndroidAutomaticGainControl_init(void *),
     IAndroidConfiguration_init(void *),
     IAndroidEffect_init(void *),
     IAndroidEffectCapabilities_init(void *),
@@ -264,6 +266,7 @@ extern void
     IMetadataExtraction_init(void *),
     IMetadataTraversal_init(void *),
     IMuteSolo_init(void *),
+    IAndroidNoiseSuppression_init(void *),
     IObject_init(void *),
     IOutputMix_init(void *),
     IOutputMixExt_init(void *),
@@ -283,9 +286,12 @@ extern void
 
 extern void
     I3DGrouping_deinit(void *),
+    IAndroidAcousticEchoCancellation_deinit(void *),
+    IAndroidAutomaticGainControl_deinit(void *),
     IAndroidEffect_deinit(void *),
     IAndroidEffectCapabilities_deinit(void *),
     IAndroidBufferQueue_deinit(void *),
+    IAndroidNoiseSuppression_deinit(void*),
     IBassBoost_deinit(void *),
     IBufferQueue_deinit(void *),
     IEngine_deinit(void *),
@@ -297,7 +303,10 @@ extern void
     IVirtualizer_deinit(void *);
 
 extern bool
+    IAndroidAcousticEchoCancellation_Expose(void *),
+    IAndroidAutomaticGainControl_Expose(void *),
     IAndroidEffectCapabilities_Expose(void *),
+    IAndroidNoiseSuppression_Expose(void *),
     IBassBoost_Expose(void *),
     IEnvironmentalReverb_Expose(void *),
     IEqualizer_Expose(void *),
@@ -479,6 +488,13 @@ extern bool
     { /* MPH_XAVIDEOENCODERCAPABILITIES */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XAVIDEOPOSTPROCESSING */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XAVOLUME, */ IVolume_init, NULL, NULL, NULL, NULL },
+    { /* MPH_ANDROIDACOUSTICECHOCANCELLATION, */ IAndroidAcousticEchoCancellation_init, NULL,
+            IAndroidAcousticEchoCancellation_deinit, IAndroidAcousticEchoCancellation_Expose,
+            NULL },
+    { /* MPH_ANDROIDAUTOMATICGAINCONTROL, */ IAndroidAutomaticGainControl_init, NULL,
+            IAndroidAutomaticGainControl_deinit, IAndroidAutomaticGainControl_Expose, NULL },
+    { /* MPH_ANDROIDNOISESUPPRESSION, */ IAndroidNoiseSuppression_init, NULL,
+            IAndroidNoiseSuppression_deinit, IAndroidNoiseSuppression_Expose, NULL },
 };
 
 

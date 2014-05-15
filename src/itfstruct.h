@@ -675,4 +675,28 @@ typedef struct {
     bool mEOS;  // whether EOS has been enqueued; never reset
 } IAndroidBufferQueue;
 
+typedef struct {
+    const struct SLAndroidAcousticEchoCancellationItf_ *mItf;
+    IObject *mThis;
+    SLboolean mEnabled;
+    effect_descriptor_t mAECDescriptor;
+    android::sp<android::AudioEffect> mAECEffect;
+} IAndroidAcousticEchoCancellation;
+
+typedef struct {
+    const struct SLAndroidAutomaticGainControlItf_ *mItf;
+    IObject *mThis;
+    SLboolean mEnabled;
+     effect_descriptor_t mAGCDescriptor;
+     android::sp<android::AudioEffect> mAGCEffect;
+} IAndroidAutomaticGainControl;
+
+typedef struct {
+    const struct SLAndroidNoiseSuppressionItf_ *mItf;
+    IObject *mThis;
+    SLboolean mEnabled;
+    effect_descriptor_t mNSDescriptor;
+    android::sp<android::AudioEffect> mNSEffect;
+} IAndroidNoiseSuppression;
+
 #endif
