@@ -32,6 +32,9 @@ How to examine the output with Audacity:
   Sample rate 22050 Hz
  Click Import button
 
+How to convert with sox:
+ sox -r 22050 -s -2 myrec.raw myrec.wav
+
 */
 
 
