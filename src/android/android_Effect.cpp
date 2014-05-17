@@ -931,7 +931,7 @@ android::status_t android_agc_getParam(android::sp<android::AudioEffect> pFx,
 }
 
 //-----------------------------------------------------------------------------
-static const int NS_PARAM_SIZE_MAX = sizeof(effect_param_t) + sizeof(int32_t);
+static const int NS_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t);
 /**
  * returns the size in bytes of the value of each noise suppression parameter
  */
