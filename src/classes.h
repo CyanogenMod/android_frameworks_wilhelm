@@ -120,7 +120,7 @@
     // mandated interfaces
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_AudioRecorder 11 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#define INTERFACES_AudioRecorder 14 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
 #else
 #define INTERFACES_AudioRecorder 9  // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
 #endif
@@ -134,6 +134,9 @@
     IEqualizer mEqualizer;
     IVisualization mVisualization;
     IVolume mVolume;
+    IAndroidAcousticEchoCancellation  mAcousticEchoCancellation;
+    IAndroidAutomaticGainControl mAutomaticGainControl;
+    IAndroidNoiseSuppression mNoiseSuppression;
 #ifdef ANDROID
     IBufferQueue mBufferQueue;
     IAndroidConfiguration mAndroidConfiguration;

@@ -24,6 +24,10 @@
 #include <audio_effects/effect_presetreverb.h>
 #include <audio_effects/effect_virtualizer.h>
 
+#include <audio_effects/effect_aec.h>
+#include <audio_effects/effect_agc.h>
+#include <audio_effects/effect_ns.h>
+
 #include <system/audio.h>
 
 static const int EQUALIZER_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t)
@@ -856,4 +860,106 @@ SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
  */
 bool android_genericFx_hasEffect(IAndroidEffect* iae, SLInterfaceID pUuid) {
     return( 0 <= iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid)));
+}
+
+//-----------------------------------------------------------------------------
+static const int AEC_PARAM_SIZE_MAX = sizeof(effect_param_t) + (2 * sizeof(int32_t));
+/**
+ * returns the size in bytes of the value of each acoustic echo cancellation parameter
+ */
+uint32_t aec_valueSize(int32_t param) {
+    uint32_t size;
+    switch (param) {
+    case AEC_PARAM_ECHO_DELAY:
+        size = sizeof(int32_t);
+        break;
+    default:
+        size = sizeof(int32_t);
+        SL_LOGE("Trying to access an unknown Acoustic Echo Cancellation parameter %d", param);
+        break;
+    }
+
+    return size;
+}
+
+android::status_t android_aec_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+    return android_fx_setParam(pFx, param, AEC_PARAM_SIZE_MAX,
+            pValue, aec_valueSize(param));
+}
+
+android::status_t android_aec_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+    return android_fx_getParam(pFx, param, AEC_PARAM_SIZE_MAX,
+            pValue, aec_valueSize(param));
+}
+
+//-----------------------------------------------------------------------------
+static const int AGC_PARAM_SIZE_MAX = sizeof(effect_param_t) + (2 * sizeof(int16_t)) + sizeof(bool);
+/**
+ * returns the size in bytes of the value of each automatic gain control parameter
+ */
+uint32_t agc_valueSize(int32_t param) {
+    uint32_t size;
+    switch (param) {
+    case AGC_PARAM_TARGET_LEVEL:
+    case AGC_PARAM_COMP_GAIN:
+        size = sizeof(int16_t);
+        break;
+    case AGC_PARAM_LIMITER_ENA:
+        size = sizeof(bool);
+        break;
+    default:
+        size = sizeof(int32_t);
+        SL_LOGE("Trying to access an unknown Automatic Gain Control parameter %d", param);
+        break;
+    }
+
+    return size;
+}
+
+android::status_t android_agc_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+    return android_fx_setParam(pFx, param, AGC_PARAM_SIZE_MAX,
+            pValue, agc_valueSize(param));
+}
+
+android::status_t android_agc_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+    return android_fx_getParam(pFx, param, AGC_PARAM_SIZE_MAX,
+            pValue, agc_valueSize(param));
+}
+
+//-----------------------------------------------------------------------------
+static const int NS_PARAM_SIZE_MAX = sizeof(effect_param_t) + sizeof(int32_t);
+/**
+ * returns the size in bytes of the value of each noise suppression parameter
+ */
+uint32_t ns_valueSize(int32_t param) {
+    uint32_t size;
+    switch (param) {
+    case NS_PARAM_LEVEL:
+        size = sizeof(int32_t);
+        break;
+    default:
+        size = sizeof(int32_t);
+        SL_LOGE("Trying to access an unknown Noise suppression parameter %d", param);
+        break;
+    }
+
+    return size;
+}
+
+android::status_t android_ns_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue)
+{
+    return android_fx_setParam(pFx, param, NS_PARAM_SIZE_MAX,
+            pValue, ns_valueSize(param));
+}
+
+android::status_t android_ns_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue)
+{
+    return android_fx_getParam(pFx, param, NS_PARAM_SIZE_MAX,
+            pValue, ns_valueSize(param));
 }

@@ -125,7 +125,12 @@
 #define MPH_XAVIDEOPOSTPROCESSING        88
 #define MPH_XAVOLUME                     89
 
+// Android API level 20 extended interfaces
+#define MPH_ANDROIDACOUSTICECHOCANCELLATION 90
+#define MPH_ANDROIDAUTOMATICGAINCONTROL     91
+#define MPH_ANDROIDNOISESUPPRESSION         92
+
 // total number of interface IDs
-#define MPH_MAX                          90
+#define MPH_MAX                          93
 
 #endif // !defined(__MPH_H)

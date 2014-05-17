@@ -109,6 +109,8 @@ LOCAL_SRC_FILES:=                     \
         itf/IAndroidEffect.cpp            \
         itf/IAndroidEffectCapabilities.c  \
         itf/IAndroidEffectSend.c          \
+        itf/IAcousticEchoCancellation.c   \
+        itf/IAutomaticGainControl.c       \
         itf/IBassBoost.c                  \
         itf/IBufferQueue.c                \
         itf/IDynamicInterfaceManagement.c \
@@ -118,6 +120,7 @@ LOCAL_SRC_FILES:=                     \
         itf/IEnvironmentalReverb.c        \
         itf/IEqualizer.c                  \
         itf/IMetadataExtraction.c         \
+        itf/INoiseSuppression.c           \
         itf/IMuteSolo.c                   \
         itf/IObject.c                     \
         itf/IOutputMix.c                  \
@@ -185,7 +188,8 @@ LOCAL_SHARED_LIBRARIES :=         \
         libstagefright_http_support \
         libcutils                 \
         libgui                    \
-        libdl
+        libdl                     \
+        libeffects
 
 
 
