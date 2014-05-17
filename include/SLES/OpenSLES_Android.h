@@ -33,19 +33,6 @@ typedef sl_int64_t             SLAint64;          /* 64 bit signed integer   */
 typedef sl_uint64_t            SLAuint64;         /* 64 bit unsigned integer */
 
 /*---------------------------------------------------------------------------*/
-/* Android composite channel masks                                           */
-/*---------------------------------------------------------------------------*/
-//#define SL_ANDROID_SPEAKER_QUAD (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT \
-// | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT)
-
-//#define SL_ANDROID_SPEAKER_5DOT1 (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT \
-// | SL_SPEAKER_FRONT_CENTER  | SL_SPEAKER_LOW_FREQUENCY| SL_SPEAKER_BACK_LEFT \
-// | SL_SPEAKER_BACK_RIGHT)
-//
-//#define SL_ANDROID_SPEAKER_7DOT1 (SL_ANDROID_SPEAKER_5DOT1 | SL_SPEAKER_SIDE_LEFT \
-// |SL_SPEAKER_SIDE_RIGHT)
-
-/*---------------------------------------------------------------------------*/
 /* Android PCM Data Format                                                   */
 /*---------------------------------------------------------------------------*/
 #define SL_ANDROID_PCMSAMPLEFORMAT  ((SLuint16) 0x8000)
