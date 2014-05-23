@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 #ifdef ANDROID
 #include <audio_utils/sndfile.h>
 #else
@@ -222,6 +223,8 @@ int main(int argc, char **argv)
             transferFormat = AUDIO_FORMAT_PCM_24_BIT_PACKED;
         } else if (!strcmp(arg, "-32")) {
             transferFormat = AUDIO_FORMAT_PCM_32_BIT;
+        } else if (!strcmp(arg, "-32f")) {
+            transferFormat = AUDIO_FORMAT_PCM_FLOAT;
         } else if (!strncmp(arg, "-f", 2)) {
             framesPerBuffer = atoi(&arg[2]);
         } else if (!strncmp(arg, "-n", 2)) {
@@ -250,13 +253,14 @@ int main(int argc, char **argv)
     }
 
     if (argc - i != 1) {
-        fprintf(stderr, "usage: [-b/l] [-8 | -24 | -32] [-f#] [-n#] [-p#] [-r]"
+        fprintf(stderr, "usage: [-b/l] [-8 | -24 | -32 | -32f] [-f#] [-n#] [-p#] [-r]"
                 " %s filename\n", argv[0]);
         fprintf(stderr, "    -b  force big-endian byte order (default is native byte order)\n");
         fprintf(stderr, "    -l  force little-endian byte order (default is native byte order)\n");
         fprintf(stderr, "    -8  output 8-bits per sample (default is 16-bits per sample)\n");
         fprintf(stderr, "    -24 output 24-bits per sample\n");
         fprintf(stderr, "    -32 output 32-bits per sample\n");
+        fprintf(stderr, "    -32f output float 32-bits per sample\n");
         fprintf(stderr, "    -f# frames per buffer (default 512)\n");
         fprintf(stderr, "    -n# number of buffers (default 2)\n");
         fprintf(stderr, "    -p# initial playback rate in per mille (default 1000)\n");
@@ -388,15 +392,20 @@ int main(int argc, char **argv)
     SLDataLocator_BufferQueue loc_bufq;
     loc_bufq.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
     loc_bufq.numBuffers = numBuffers;
-    SLDataFormat_PCM format_pcm;
-    format_pcm.formatType = SL_DATAFORMAT_PCM;
+    SLAndroidDataFormat_PCM_EX format_pcm;
+    format_pcm.formatType = transferFormat == AUDIO_FORMAT_PCM_FLOAT
+            ? SL_ANDROID_DATAFORMAT_PCM_EX : SL_DATAFORMAT_PCM;
     format_pcm.numChannels = sfinfo.channels;
-    format_pcm.samplesPerSec = sfinfo.samplerate * 1000;
+    format_pcm.sampleRate = sfinfo.samplerate * 1000;
     format_pcm.bitsPerSample = bitsPerSample;
     format_pcm.containerSize = format_pcm.bitsPerSample;
     format_pcm.channelMask = 1 == format_pcm.numChannels ? SL_SPEAKER_FRONT_CENTER :
             SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     format_pcm.endianness = byteOrder;
+    format_pcm.representation = transferFormat == AUDIO_FORMAT_PCM_FLOAT
+            ? SL_ANDROID_PCM_REPRESENTATION_FLOAT : transferFormat == AUDIO_FORMAT_PCM_8_BIT
+                    ? SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT
+                            : SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT;
     SLDataSource audioSrc;
     audioSrc.pLocator = &loc_bufq;
     audioSrc.pFormat = &format_pcm;

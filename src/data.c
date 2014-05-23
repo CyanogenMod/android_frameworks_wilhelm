@@ -347,14 +347,29 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 {
     assert(NULL != name && NULL != pDataFormat);
     SLresult result = SL_RESULT_SUCCESS;
-
+    const SLuint32 *df_representation = NULL; // pointer to representation field, if it exists
     SLuint32 formatType;
     if (NULL == pFormat) {
         pDataFormat->mFormatType = formatType = SL_DATAFORMAT_NULL;
     } else {
         formatType = *(SLuint32 *)pFormat;
         switch (formatType) {
-
+        case SL_ANDROID_DATAFORMAT_PCM_EX:
+            pDataFormat->mPCMEx.representation =
+                    ((SLAndroidDataFormat_PCM_EX *)pFormat)->representation;
+            switch (pDataFormat->mPCMEx.representation) {
+            case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
+            case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
+            case SL_ANDROID_PCM_REPRESENTATION_FLOAT:
+                df_representation = &pDataFormat->mPCMEx.representation;
+                break;
+            default:
+                SL_LOGE("%s: unsupported representation: %d", name,
+                        pDataFormat->mPCMEx.representation);
+                result = SL_RESULT_PARAMETER_INVALID;
+                break;
+            }
+            // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM:
             pDataFormat->mPCM = *(SLDataFormat_PCM *)pFormat;
             do {
@@ -407,31 +422,40 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
 
-                // check the sample bit depth
-                switch (pDataFormat->mPCM.bitsPerSample) {
-                case SL_PCMSAMPLEFORMAT_FIXED_8:
-                case SL_PCMSAMPLEFORMAT_FIXED_16:
-                case SL_PCMSAMPLEFORMAT_FIXED_24:
-                case SL_PCMSAMPLEFORMAT_FIXED_32:
+                // check the container bit depth
+                switch (pDataFormat->mPCM.containerSize) {
+                case 8:
+                    if (df_representation &&
+                            *df_representation != SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
                     break;
-                case SL_PCMSAMPLEFORMAT_FIXED_20:
-                case SL_PCMSAMPLEFORMAT_FIXED_28:
-                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                case 16:
+                case 24:
+                    if (df_representation &&
+                            *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
+                case 32:
+                    if (df_representation
+                            && *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT
+                            && *df_representation != SL_ANDROID_PCM_REPRESENTATION_FLOAT) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
                     break;
                 default:
                     result = SL_RESULT_PARAMETER_INVALID;
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("%s: bitsPerSample=%u", name, pDataFormat->mPCM.bitsPerSample);
+                    SL_LOGE("%s: containerSize=%u", name, pDataFormat->mPCM.containerSize);
                     break;
                 }
 
-                // check the container bit depth
+                // container size cannot be less than sample size
                 if (pDataFormat->mPCM.containerSize < pDataFormat->mPCM.bitsPerSample) {
                     result = SL_RESULT_PARAMETER_INVALID;
-                } else if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample) {
-                    result = SL_RESULT_CONTENT_UNSUPPORTED;
                 }
                 if (SL_RESULT_SUCCESS != result) {
                     SL_LOGE("%s: containerSize=%u, bitsPerSample=%u", name,
@@ -601,6 +625,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
         case SL_DATAFORMAT_NULL:
         case SL_DATAFORMAT_MIME:
         case SL_DATAFORMAT_PCM:
+        case SL_ANDROID_DATAFORMAT_PCM_EX:
         case XA_DATAFORMAT_RAWIMAGE:
             actualMask = 1L << formatType;
             break;
@@ -749,6 +774,7 @@ static void freeDataFormat(DataFormat *pDataFormat)
             pDataFormat->mMIME.mimeType = NULL;
         }
         break;
+    case SL_ANDROID_DATAFORMAT_PCM_EX:
     case SL_DATAFORMAT_PCM:
     case XA_DATAFORMAT_RAWIMAGE:
     case SL_DATAFORMAT_NULL:
@@ -795,7 +821,7 @@ SLresult checkDataSource(const char *name, const SLDataSource *pDataSrc,
         break;
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_BUFFERQUEUE:
-        allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
+        allowedDataFormatMask &= DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX;
         break;
     // Per the spec, the pFormat field is ignored in some cases
     case SL_DATALOCATOR_IODEVICE:
@@ -814,7 +840,7 @@ SLresult checkDataSource(const char *name, const SLDataSource *pDataSrc,
         allowedDataFormatMask &= DATAFORMAT_MASK_MIME;
         break;
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
-        allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
+        allowedDataFormatMask &= DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX;
         break;
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
         allowedDataFormatMask &= DATAFORMAT_MASK_MIME;;
@@ -872,7 +898,7 @@ SLresult checkDataSink(const char *name, const SLDataSink *pDataSink,
         break;
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_BUFFERQUEUE:
-        allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
+        allowedDataFormatMask &= DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX;
         break;
     // Per the spec, the pFormat field is ignored in some cases
     case SL_DATALOCATOR_IODEVICE:
@@ -889,7 +915,7 @@ SLresult checkDataSink(const char *name, const SLDataSink *pDataSink,
         allowedDataFormatMask = DATAFORMAT_MASK_NONE;
         break;
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
-        allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
+        allowedDataFormatMask &= DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX;
         break;
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
         allowedDataFormatMask = DATAFORMAT_MASK_NONE;

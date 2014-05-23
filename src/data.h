@@ -34,6 +34,7 @@ typedef union {
 typedef union {
     SLuint32 mFormatType;
     SLDataFormat_PCM mPCM;
+    SLAndroidDataFormat_PCM_EX mPCMEx;
     SLDataFormat_MIME mMIME;
     XADataFormat_RawImage mRawImage;
 } DataFormat;
@@ -81,6 +82,7 @@ typedef struct {
 #define DATAFORMAT_MASK_NULL             (1L << SL_DATAFORMAT_NULL)
 #define DATAFORMAT_MASK_MIME             (1L << SL_DATAFORMAT_MIME)
 #define DATAFORMAT_MASK_PCM              (1L << SL_DATAFORMAT_PCM)
+#define DATAFORMAT_MASK_PCM_EX           (1L << SL_ANDROID_DATAFORMAT_PCM_EX)
 #define DATAFORMAT_MASK_RAWIMAGE         (1L << XA_DATAFORMAT_RAWIMAGE)
 #define DATAFORMAT_MASK_ALL              0xFL
 
