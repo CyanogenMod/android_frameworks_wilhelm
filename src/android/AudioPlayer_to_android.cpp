@@ -882,8 +882,8 @@ SLresult android_audioPlayer_validateChannelMask(uint32_t mask, int numChans) {
         ALOGE("Unsupported channels (top or front left/right of center)");
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
-    // verify has FL/FR
-    if ((mask & AUDIO_CHANNEL_OUT_STEREO) != AUDIO_CHANNEL_OUT_STEREO) {
+    // verify has FL/FR if more than one channel
+    if (numChans > 1 && (mask & AUDIO_CHANNEL_OUT_STEREO) != AUDIO_CHANNEL_OUT_STEREO) {
         ALOGE("Front channels must be present");
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
