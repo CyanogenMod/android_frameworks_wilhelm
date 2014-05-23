@@ -972,6 +972,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case SL_PCMSAMPLEFORMAT_FIXED_8:
             case SL_PCMSAMPLEFORMAT_FIXED_16:
             case SL_PCMSAMPLEFORMAT_FIXED_24:
+            case SL_PCMSAMPLEFORMAT_FIXED_32:
                 break;
                 // others
             default:
@@ -984,6 +985,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case 8:
             case 16:
             case 24:
+            case 32:
                 break;
                 // others
             default:
@@ -1489,7 +1491,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
-                sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
+                sles_to_android_sampleFormat(df_pcm->formatType, df_pcm->containerSize), // format
                 sles_to_android_channelMaskOut(df_pcm->numChannels, df_pcm->channelMask),
                                                                      // channel mask
                 0,                                                   // frameCount

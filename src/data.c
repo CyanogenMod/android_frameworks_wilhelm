@@ -412,10 +412,10 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 case SL_PCMSAMPLEFORMAT_FIXED_8:
                 case SL_PCMSAMPLEFORMAT_FIXED_16:
                 case SL_PCMSAMPLEFORMAT_FIXED_24:
+                case SL_PCMSAMPLEFORMAT_FIXED_32:
                     break;
                 case SL_PCMSAMPLEFORMAT_FIXED_20:
                 case SL_PCMSAMPLEFORMAT_FIXED_28:
-                case SL_PCMSAMPLEFORMAT_FIXED_32:
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
                     break;
                 default:

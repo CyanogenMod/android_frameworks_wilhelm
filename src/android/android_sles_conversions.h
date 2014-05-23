@@ -44,25 +44,25 @@ static inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz)
     return (uint32_t)(sampleRateMilliHertz / 1000);
 }
 
-static inline audio_format_t sles_to_android_sampleFormat(SLuint32 pcmFormat) {
-    switch (pcmFormat) {
-        case SL_PCMSAMPLEFORMAT_FIXED_16:
-            return AUDIO_FORMAT_PCM_16_BIT;
-            break;
-        case SL_PCMSAMPLEFORMAT_FIXED_8:
-            return AUDIO_FORMAT_PCM_8_BIT;
-            break;
-        case SL_PCMSAMPLEFORMAT_FIXED_24:
-            return AUDIO_FORMAT_PCM_8_24_BIT;
-            // Maybe one of these???
-            // return AUDIO_FORMAT_PCM_32_BIT;
-            // return AUDIO_FORMAT_PCM_24_BIT_PACKED;
-            break;
-        case SL_PCMSAMPLEFORMAT_FIXED_20:
-        case SL_PCMSAMPLEFORMAT_FIXED_28:
-        case SL_PCMSAMPLEFORMAT_FIXED_32:
-        default:
-            return AUDIO_FORMAT_INVALID;
+static inline audio_format_t sles_to_android_sampleFormat(SLuint32 formatType,
+        SLuint32 containerSize) {
+    switch (formatType) {
+    case SL_DATAFORMAT_PCM:
+        switch (containerSize) {
+            case 8:
+                return AUDIO_FORMAT_PCM_8_BIT;
+            case 16:
+                return AUDIO_FORMAT_PCM_16_BIT;
+            case 24:
+                return AUDIO_FORMAT_PCM_24_BIT_PACKED;
+            case 32:
+                return AUDIO_FORMAT_PCM_32_BIT;
+            default:
+                return AUDIO_FORMAT_INVALID;
+        }
+        break;
+    default:
+        return AUDIO_FORMAT_INVALID;
     }
 }
 
