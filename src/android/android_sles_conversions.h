@@ -44,11 +44,10 @@ static inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz)
     return (uint32_t)(sampleRateMilliHertz / 1000);
 }
 
-static inline audio_format_t sles_to_android_sampleFormat(SLuint32 formatType,
-        SLuint32 containerSize) {
-    switch (formatType) {
+static inline audio_format_t sles_to_android_sampleFormat(const SLDataFormat_PCM *df_pcm) {
+    switch (df_pcm->formatType) {
     case SL_DATAFORMAT_PCM:
-        switch (containerSize) {
+        switch (df_pcm->containerSize) {
             case 8:
                 return AUDIO_FORMAT_PCM_8_BIT;
             case 16:
@@ -60,7 +59,36 @@ static inline audio_format_t sles_to_android_sampleFormat(SLuint32 formatType,
             default:
                 return AUDIO_FORMAT_INVALID;
         }
-        break;
+    case SL_ANDROID_DATAFORMAT_PCM_EX:
+        switch (((SLAndroidDataFormat_PCM_EX *)df_pcm)->representation) {
+        case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
+            switch (df_pcm->containerSize) {
+            case 8:
+                return AUDIO_FORMAT_PCM_8_BIT;
+            default:
+                return AUDIO_FORMAT_INVALID;
+            }
+        case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
+            switch (df_pcm->containerSize) {
+            case 16:
+                return AUDIO_FORMAT_PCM_16_BIT;
+            case 24:
+                return AUDIO_FORMAT_PCM_24_BIT_PACKED;
+            case 32:
+                return AUDIO_FORMAT_PCM_32_BIT;
+            default:
+                return AUDIO_FORMAT_INVALID;
+            }
+        case SL_ANDROID_PCM_REPRESENTATION_FLOAT:
+            switch (df_pcm->containerSize) {
+            case 32:
+                return AUDIO_FORMAT_PCM_FLOAT;
+            default:
+                return AUDIO_FORMAT_INVALID;
+            }
+        default:
+            return AUDIO_FORMAT_INVALID;
+        }
     default:
         return AUDIO_FORMAT_INVALID;
     }

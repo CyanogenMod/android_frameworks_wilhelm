@@ -252,7 +252,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                             | DATALOCATOR_MASK_ANDROIDFD | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE
                             | DATALOCATOR_MASK_ANDROIDBUFFERQUEUE
 #endif
-                            , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM);
+                            , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX);
 
                     if (SL_RESULT_SUCCESS != result) {
                         break;
@@ -266,7 +266,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 #endif
                             , DATAFORMAT_MASK_NULL
 #ifdef ANDROID
-                            | DATAFORMAT_MASK_PCM                       // for decode to PCM
+                            | DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX  // for decode to PCM
 #endif
                             );
                     if (SL_RESULT_SUCCESS != result) {
@@ -299,7 +299,9 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 #endif
                         usesSimpleBufferQueue = true;
                         nbBuffers = (SLuint16) thiz->mDataSource.mLocator.mBufferQueue.numBuffers;
-                        assert(SL_DATAFORMAT_PCM == thiz->mDataSource.mFormat.mFormatType);
+                        assert(SL_DATAFORMAT_PCM == thiz->mDataSource.mFormat.mFormatType
+                                || SL_ANDROID_DATAFORMAT_PCM_EX
+                                    == thiz->mDataSource.mFormat.mFormatType);
                         thiz->mNumChannels = thiz->mDataSource.mFormat.mPCM.numChannels;
                         thiz->mSampleRateMilliHz = thiz->mDataSource.mFormat.mPCM.samplesPerSec;
                         break;
@@ -320,7 +322,9 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
                         usesSimpleBufferQueue = true;
                         nbBuffers = thiz->mDataSink.mLocator.mBufferQueue.numBuffers;
-                        assert(SL_DATAFORMAT_PCM == thiz->mDataSink.mFormat.mFormatType);
+                        assert(SL_DATAFORMAT_PCM == thiz->mDataSink.mFormat.mFormatType
+                                || SL_ANDROID_DATAFORMAT_PCM_EX
+                                    == thiz->mDataSink.mFormat.mFormatType);
                         // FIXME The values specified by the app are meaningless. We get the
                         // real values from the decoder.  But the data sink checks currently require
                         // that the app specify these useless values.  Needs doc/fix.
@@ -467,7 +471,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 #ifdef ANDROID
                             | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE
 #endif
-                            , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM
+                            , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM | DATAFORMAT_MASK_PCM_EX
                     );
                     if (SL_RESULT_SUCCESS != result) {
                         break;
