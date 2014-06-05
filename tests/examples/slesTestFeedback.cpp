@@ -27,15 +27,18 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <media/nbaio/MonoPipe.h>
+#include <media/nbaio/MonoPipeReader.h>
+
 #define ASSERT_EQ(x, y) do { if ((x) == (y)) ; else { fprintf(stderr, "0x%x != 0x%x\n", \
     (unsigned) (x), (unsigned) (y)); assert((x) == (y)); } } while (0)
 
 // default values
 static SLuint32 rxBufCount = 2;     // -r#
 static SLuint32 txBufCount = 2;     // -t#
-static SLuint32 bufSizeInFrames = 256;  // -f#
+static SLuint32 bufSizeInFrames = 240;  // -f#
 static SLuint32 channels = 1;       // -c#
-static SLuint32 sampleRate = 44100; // -s#
+static SLuint32 sampleRate = 48000; // -s#
 static SLuint32 exitAfterSeconds = 60; // -e#
 static SLuint32 freeBufCount = 0;   // calculated
 static SLuint32 bufSizeInBytes = 0; // calculated
@@ -58,6 +61,9 @@ static SLBufferQueueItf playerBufferQueue;
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+static android::MonoPipeReader *pipeReader;
+static android::MonoPipe *pipeWriter;
+
 // Called after audio recorder fills a buffer with data
 static void recorderCallback(SLAndroidSimpleBufferQueueItf caller, void *context)
 {
@@ -76,6 +82,26 @@ static void recorderCallback(SLAndroidSimpleBufferQueueItf caller, void *context
         rxFront = 0;
     }
 
+#if 1
+    ssize_t actual = pipeWriter->write(buffer, (size_t) bufSizeInFrames);
+    if (actual != (ssize_t) bufSizeInFrames) {
+        write(1, "?", 1);
+    }
+
+    // Enqueue this same buffer for the recorder to fill again.
+    result = (*recorderBufferQueue)->Enqueue(recorderBufferQueue, buffer, bufSizeInBytes);
+    ASSERT_EQ(SL_RESULT_SUCCESS, result);
+
+    // Update our model of the record queue
+    SLuint32 rxRearNext = rxRear+1;
+    if (rxRearNext > rxBufCount) {
+        rxRearNext = 0;
+    }
+    assert(rxRearNext != rxFront);
+    rxBuffers[rxRear] = buffer;
+    rxRear = rxRearNext;
+
+#else
     // Enqueue the just-filled buffer for the player
     result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, bufSizeInBytes);
     if (SL_RESULT_SUCCESS == result) {
@@ -112,6 +138,7 @@ static void recorderCallback(SLAndroidSimpleBufferQueueItf caller, void *context
         rxRear = rxRearNext;
 
     }
+#endif
 
     pthread_mutex_unlock(&mutex);
 }
@@ -133,6 +160,30 @@ static void playerCallback(SLBufferQueueItf caller, void *context)
         txFront = 0;
     }
 
+#if 1
+    ssize_t actual = pipeReader->read(buffer, bufSizeInFrames, (int64_t) -1);
+    if (actual != (ssize_t) bufSizeInFrames) {
+        write(1, "/", 1);
+        // on underrun from pipe, substitute silence
+        memset(buffer, 0, bufSizeInFrames * channels * sizeof(short));
+    }
+
+    // Enqueue the filled buffer for playing
+    result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, bufSizeInBytes);
+    ASSERT_EQ(SL_RESULT_SUCCESS, result);
+
+    // Update our model of the player queue
+    assert(txFront <= txBufCount);
+    assert(txRear <= txBufCount);
+    SLuint32 txRearNext = txRear+1;
+    if (txRearNext > txBufCount) {
+        txRearNext = 0;
+    }
+    assert(txRearNext != txFront);
+    txBuffers[txRear] = buffer;
+    txRear = txRearNext;
+
+#else
     // First try to enqueue the free buffer for recording
     result = (*recorderBufferQueue)->Enqueue(recorderBufferQueue, buffer, bufSizeInBytes);
     if (SL_RESULT_SUCCESS == result) {
@@ -166,6 +217,7 @@ static void playerCallback(SLBufferQueueItf caller, void *context)
         freeRear = freeRearNext;
 
     }
+#endif
 
     pthread_mutex_unlock(&mutex);
 }
@@ -269,6 +321,18 @@ int main(int argc, char **argv)
     txFront = 0;
     txRear = 0;
 
+    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(sampleRate, channels,
+            AUDIO_FORMAT_PCM_16_BIT);
+    pipeWriter = new android::MonoPipe(1024, nbaio_format, false /*writeCanBlock*/);
+    android::NBAIO_Format offer = nbaio_format;
+    size_t numCounterOffers = 0;
+    ssize_t neg = pipeWriter->negotiate(&offer, 1, NULL, numCounterOffers);
+    assert(0 == neg);
+    pipeReader = new android::MonoPipeReader(pipeWriter);
+    numCounterOffers = 0;
+    neg = pipeReader->negotiate(&offer, 1, NULL, numCounterOffers);
+    assert(0 == neg);
+
     SLresult result;
 
     // create engine
@@ -330,6 +394,30 @@ int main(int argc, char **argv)
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
     result = (*playerBufferQueue)->RegisterCallback(playerBufferQueue, playerCallback, NULL);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
+
+    // Enqueue some zero buffers for the player
+    for (j = 0; j < txBufCount; ++j) {
+
+        // allocate a free buffer
+        assert(freeFront != freeRear);
+        char *buffer = freeBuffers[freeFront];
+        if (++freeFront > freeBufCount) {
+            freeFront = 0;
+        }
+
+        // put on play queue
+        SLuint32 txRearNext = txRear + 1;
+        if (txRearNext > txBufCount) {
+            txRearNext = 0;
+        }
+        assert(txRearNext != txFront);
+        txBuffers[txRear] = buffer;
+        txRear = txRearNext;
+        result = (*playerBufferQueue)->Enqueue(playerBufferQueue,
+            buffer, bufSizeInBytes);
+        ASSERT_EQ(SL_RESULT_SUCCESS, result);
+    }
+
     result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PLAYING);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
 
@@ -397,6 +485,11 @@ int main(int argc, char **argv)
     // Kick off the recorder
     result = (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_RECORDING);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
+
+#if 0
+    // give recorder a head start so that the pipe is initially filled
+    sleep(1);
+#endif
 
     // Wait patiently
     do {

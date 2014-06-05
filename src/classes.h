@@ -134,12 +134,12 @@
     IEqualizer mEqualizer;
     IVisualization mVisualization;
     IVolume mVolume;
-    IAndroidAcousticEchoCancellation  mAcousticEchoCancellation;
-    IAndroidAutomaticGainControl mAutomaticGainControl;
-    IAndroidNoiseSuppression mNoiseSuppression;
 #ifdef ANDROID
     IBufferQueue mBufferQueue;
     IAndroidConfiguration mAndroidConfiguration;
+    IAndroidAcousticEchoCancellation  mAcousticEchoCancellation;
+    IAndroidAutomaticGainControl mAutomaticGainControl;
+    IAndroidNoiseSuppression mNoiseSuppression;
 #endif
     // remaining are per-instance private fields not associated with an interface
     DataLocatorFormat mDataSource;

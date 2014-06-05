@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 #ifdef ANDROID
 #include <audio_utils/sndfile.h>
 #else
@@ -44,10 +45,11 @@ SNDFILE *sndfile;
 SF_INFO sfinfo;
 unsigned which; // which buffer to use next
 SLboolean eof;  // whether we have hit EOF on input yet
-short *buffers;
+void *buffers;
 SLuint32 byteOrder; // desired to use for PCM buffers
 SLuint32 nativeByteOrder;   // of platform
-SLuint32 bitsPerSample = 16;
+audio_format_t transferFormat = AUDIO_FORMAT_PCM_16_BIT;
+size_t sfframesize = 0;
 
 // swap adjacent bytes; this would normally be in <unistd.h> but is missing here
 static void swab(const void *from, void *to, ssize_t n)
@@ -75,6 +77,19 @@ static void squeeze(const short *from, unsigned char *to, ssize_t n)
     }
 }
 
+// squeeze 32-bit signed PCM samples down to 24-bit unsigned PCM samples by truncation
+static void squeeze24(const unsigned char *from, unsigned char *to, ssize_t n)
+{
+    // note that we don't squeeze the last odd bytes
+    while (n >= 3) {
+        ++from;
+        *to++ = *from++;
+        *to++ = *from++;
+        *to++ = *from++;
+        n -= 4;
+    }
+}
+
 static android::MonoPipeReader *pipeReader;
 static android::MonoPipe *pipeWriter;
 static unsigned underruns = 0;
@@ -85,22 +100,25 @@ static void callback(SLBufferQueueItf bufq, void *param)
 {
     assert(NULL == param);
     if (!eof) {
-        short *buffer = &buffers[framesPerBuffer * sfinfo.channels * which];
+        void *buffer = (char *)buffers + framesPerBuffer * sfframesize * which;
         ssize_t count = pipeReader->read(buffer, framesPerBuffer, (int64_t) -1);
         // on underrun from pipe, substitute silence
         if (0 >= count) {
-            memset(buffer, 0, framesPerBuffer * sfinfo.channels * sizeof(short));
+            memset(buffer, 0, framesPerBuffer * sfframesize);
             count = framesPerBuffer;
             ++underruns;
         }
         if (count > 0) {
-            SLuint32 nbytes = count * sfinfo.channels * sizeof(short);
+            SLuint32 nbytes = count * sfframesize;
             if (byteOrder != nativeByteOrder) {
                 swab(buffer, buffer, nbytes);
             }
-            if (bitsPerSample == 8) {
-                squeeze(buffer, (unsigned char *) buffer, nbytes);
+            if (transferFormat == AUDIO_FORMAT_PCM_8_BIT) {
+                squeeze((short *) buffer, (unsigned char *) buffer, nbytes);
                 nbytes /= 2;
+            } else if (transferFormat == AUDIO_FORMAT_PCM_24_BIT_PACKED) {
+                squeeze24((unsigned char *) buffer, (unsigned char *) buffer, nbytes);
+                nbytes = nbytes * 3 / 4;
             }
             SLresult result = (*bufq)->Enqueue(bufq, buffer, nbytes);
             assert(SL_RESULT_SUCCESS == result);
@@ -112,18 +130,34 @@ static void callback(SLBufferQueueItf bufq, void *param)
 
 // This thread reads from a (slow) filesystem with unpredictable latency and writes to pipe
 
-static void *file_reader_loop(void *arg)
+static void *file_reader_loop(void *arg __unused)
 {
 #define READ_FRAMES 256
-    short *temp = (short *) malloc(READ_FRAMES * sfinfo.channels * sizeof(short));
+    void *temp = malloc(READ_FRAMES * sfframesize);
     sf_count_t total = 0;
+    sf_count_t count;
     for (;;) {
-        sf_count_t count = sf_readf_short(sndfile, temp, (sf_count_t) READ_FRAMES);
+        switch (transferFormat) {
+        case AUDIO_FORMAT_PCM_FLOAT:
+            count = sf_readf_float(sndfile, (float *) temp, READ_FRAMES);
+            break;
+        case AUDIO_FORMAT_PCM_32_BIT:
+        case AUDIO_FORMAT_PCM_24_BIT_PACKED:
+            count = sf_readf_int(sndfile, (int *) temp, READ_FRAMES);
+            break;
+        case AUDIO_FORMAT_PCM_16_BIT:
+        case AUDIO_FORMAT_PCM_8_BIT:
+            count = sf_readf_short(sndfile, (short *) temp, READ_FRAMES);
+            break;
+        default:
+            count = 0;
+            break;
+        }
         if (0 >= count) {
             eof = SL_BOOLEAN_TRUE;
             break;
         }
-        const short *ptr = temp;
+        const unsigned char *ptr = (unsigned char *) temp;
         while (count > 0) {
             ssize_t actual = pipeWriter->write(ptr, (size_t) count);
             if (actual < 0) {
@@ -132,7 +166,7 @@ static void *file_reader_loop(void *arg)
             if ((sf_count_t) actual < count) {
                 usleep(10000);
             }
-            ptr += actual * sfinfo.channels;
+            ptr += actual * sfframesize;
             count -= actual;
             total += actual;
         }
@@ -184,7 +218,13 @@ int main(int argc, char **argv)
         } else if (!strcmp(arg, "-l")) {
             byteOrder = SL_BYTEORDER_LITTLEENDIAN;
         } else if (!strcmp(arg, "-8")) {
-            bitsPerSample = 8;
+            transferFormat = AUDIO_FORMAT_PCM_8_BIT;
+        } else if (!strcmp(arg, "-24")) {
+            transferFormat = AUDIO_FORMAT_PCM_24_BIT_PACKED;
+        } else if (!strcmp(arg, "-32")) {
+            transferFormat = AUDIO_FORMAT_PCM_32_BIT;
+        } else if (!strcmp(arg, "-32f")) {
+            transferFormat = AUDIO_FORMAT_PCM_FLOAT;
         } else if (!strncmp(arg, "-f", 2)) {
             framesPerBuffer = atoi(&arg[2]);
         } else if (!strncmp(arg, "-n", 2)) {
@@ -213,10 +253,14 @@ int main(int argc, char **argv)
     }
 
     if (argc - i != 1) {
-        fprintf(stderr, "usage: [-b/l] [-8] [-f#] [-n#] [-p#] [-r] %s filename\n", argv[0]);
+        fprintf(stderr, "usage: [-b/l] [-8 | -24 | -32 | -32f] [-f#] [-n#] [-p#] [-r]"
+                " %s filename\n", argv[0]);
         fprintf(stderr, "    -b  force big-endian byte order (default is native byte order)\n");
         fprintf(stderr, "    -l  force little-endian byte order (default is native byte order)\n");
         fprintf(stderr, "    -8  output 8-bits per sample (default is 16-bits per sample)\n");
+        fprintf(stderr, "    -24 output 24-bits per sample\n");
+        fprintf(stderr, "    -32 output 32-bits per sample\n");
+        fprintf(stderr, "    -32f output float 32-bits per sample\n");
         fprintf(stderr, "    -f# frames per buffer (default 512)\n");
         fprintf(stderr, "    -n# number of buffers (default 2)\n");
         fprintf(stderr, "    -p# initial playback rate in per mille (default 1000)\n");
@@ -235,10 +279,6 @@ int main(int argc, char **argv)
         perror(filename);
         return EXIT_FAILURE;
     }
-
-    // The sample rate is a lie, but it doesn't actually matter
-    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(44100, sfinfo.channels,
-            AUDIO_FORMAT_PCM_16_BIT);
 
     // verify the file format
     switch (sfinfo.channels) {
@@ -275,6 +315,8 @@ int main(int argc, char **argv)
     }
 
     switch (sfinfo.format & SF_FORMAT_SUBMASK) {
+    case SF_FORMAT_FLOAT:
+    case SF_FORMAT_PCM_32:
     case SF_FORMAT_PCM_16:
     case SF_FORMAT_PCM_U8:
         break;
@@ -283,9 +325,35 @@ int main(int argc, char **argv)
         goto close_sndfile;
     }
 
-    {
+    SLuint32 bitsPerSample;
+    switch (transferFormat) {
+    case AUDIO_FORMAT_PCM_FLOAT:
+        bitsPerSample = 32;
+        sfframesize = sfinfo.channels * sizeof(float);
+        break;
+    case AUDIO_FORMAT_PCM_32_BIT:
+        bitsPerSample = 32;
+        sfframesize = sfinfo.channels * sizeof(int);
+        break;
+    case AUDIO_FORMAT_PCM_24_BIT_PACKED:
+        bitsPerSample = 24;
+        sfframesize = sfinfo.channels * sizeof(int); // use int size
+        break;
+    case AUDIO_FORMAT_PCM_16_BIT:
+        bitsPerSample = 16;
+        sfframesize = sfinfo.channels * sizeof(short);
+        break;
+    case AUDIO_FORMAT_PCM_8_BIT:
+        bitsPerSample = 8;
+        sfframesize = sfinfo.channels * sizeof(short); // use short size
+        break;
+    default:
+        fprintf(stderr, "unsupported transfer format %#x\n", transferFormat);
+        goto close_sndfile;
+    }
 
-    buffers = (short *) malloc(framesPerBuffer * sfinfo.channels * sizeof(short) * numBuffers);
+    {
+    buffers = malloc(framesPerBuffer * sfframesize * numBuffers);
 
     // create engine
     SLresult result;
@@ -324,15 +392,20 @@ int main(int argc, char **argv)
     SLDataLocator_BufferQueue loc_bufq;
     loc_bufq.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
     loc_bufq.numBuffers = numBuffers;
-    SLDataFormat_PCM format_pcm;
-    format_pcm.formatType = SL_DATAFORMAT_PCM;
+    SLAndroidDataFormat_PCM_EX format_pcm;
+    format_pcm.formatType = transferFormat == AUDIO_FORMAT_PCM_FLOAT
+            ? SL_ANDROID_DATAFORMAT_PCM_EX : SL_DATAFORMAT_PCM;
     format_pcm.numChannels = sfinfo.channels;
-    format_pcm.samplesPerSec = sfinfo.samplerate * 1000;
+    format_pcm.sampleRate = sfinfo.samplerate * 1000;
     format_pcm.bitsPerSample = bitsPerSample;
     format_pcm.containerSize = format_pcm.bitsPerSample;
     format_pcm.channelMask = 1 == format_pcm.numChannels ? SL_SPEAKER_FRONT_CENTER :
             SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     format_pcm.endianness = byteOrder;
+    format_pcm.representation = transferFormat == AUDIO_FORMAT_PCM_FLOAT
+            ? SL_ANDROID_PCM_REPRESENTATION_FLOAT : transferFormat == AUDIO_FORMAT_PCM_8_BIT
+                    ? SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT
+                            : SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT;
     SLDataSource audioSrc;
     audioSrc.pLocator = &loc_bufq;
     audioSrc.pFormat = &format_pcm;
@@ -427,23 +500,43 @@ int main(int argc, char **argv)
 
     // loop until EOF or no more buffers
     for (which = 0; which < numBuffers; ++which) {
-        short *buffer = &buffers[framesPerBuffer * sfinfo.channels * which];
+        void *buffer = (char *)buffers + framesPerBuffer * sfframesize * which;
         sf_count_t frames = framesPerBuffer;
         sf_count_t count;
-        count = sf_readf_short(sndfile, buffer, frames);
+        switch (transferFormat) {
+        case AUDIO_FORMAT_PCM_FLOAT:
+            count = sf_readf_float(sndfile, (float *) buffer, frames);
+            break;
+        case AUDIO_FORMAT_PCM_32_BIT:
+            count = sf_readf_int(sndfile, (int *) buffer, frames);
+            break;
+        case AUDIO_FORMAT_PCM_24_BIT_PACKED:
+            count = sf_readf_int(sndfile, (int *) buffer, frames);
+            break;
+        case AUDIO_FORMAT_PCM_16_BIT:
+        case AUDIO_FORMAT_PCM_8_BIT:
+            count = sf_readf_short(sndfile, (short *) buffer, frames);
+            break;
+        default:
+            count = 0;
+            break;
+        }
         if (0 >= count) {
             eof = SL_BOOLEAN_TRUE;
             break;
         }
 
         // enqueue a buffer
-        SLuint32 nbytes = count * sfinfo.channels * sizeof(short);
+        SLuint32 nbytes = count * sfframesize;
         if (byteOrder != nativeByteOrder) {
             swab(buffer, buffer, nbytes);
         }
-        if (bitsPerSample == 8) {
-            squeeze(buffer, (unsigned char *) buffer, nbytes);
+        if (transferFormat == AUDIO_FORMAT_PCM_8_BIT) {
+            squeeze((short *) buffer, (unsigned char *) buffer, nbytes);
             nbytes /= 2;
+        } else if (transferFormat == AUDIO_FORMAT_PCM_24_BIT_PACKED) {
+            squeeze24((unsigned char *) buffer, (unsigned char *) buffer, nbytes);
+            nbytes = nbytes * 3 / 4;
         }
         result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, nbytes);
         assert(SL_RESULT_SUCCESS == result);
@@ -456,6 +549,13 @@ int main(int argc, char **argv)
     result = (*playerBufferQueue)->RegisterCallback(playerBufferQueue, callback, NULL);
     assert(SL_RESULT_SUCCESS == result);
 
+    // Create a NBAIO pipe for asynchronous data handling.  In this case,
+    // sample rate doesn't matter and audio_format just sets the transfer frame size.
+    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(
+            sfinfo.samplerate, sfinfo.channels,
+            transferFormat == AUDIO_FORMAT_PCM_8_BIT ? AUDIO_FORMAT_PCM_16_BIT :
+                    transferFormat == AUDIO_FORMAT_PCM_24_BIT_PACKED ?
+                            AUDIO_FORMAT_PCM_32_BIT : transferFormat);
     pipeWriter = new android::MonoPipe(16384, nbaio_format, false /*writeCanBlock*/);
     android::NBAIO_Format offer = nbaio_format;
     size_t numCounterOffers = 0;

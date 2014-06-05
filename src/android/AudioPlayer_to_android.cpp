@@ -927,6 +927,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     const SLuint32 sourceFormatType = *(SLuint32 *)pAudioSrc->pFormat;
     const SLuint32 sinkFormatType = *(SLuint32 *)pAudioSnk->pFormat;
 
+    const SLuint32 *df_representation = NULL; // pointer to representation field, if it exists
+
     switch (sourceLocatorType) {
     //------------------
     //   Buffer Queues
@@ -938,6 +940,21 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         // Buffer format
         switch (sourceFormatType) {
         //     currently only PCM buffer queues are supported,
+        case SL_ANDROID_DATAFORMAT_PCM_EX: {
+            SLAndroidDataFormat_PCM_EX *df_pcm =
+                    (SLAndroidDataFormat_PCM_EX *) pAudioSrc->pFormat;
+            switch (df_pcm->representation) {
+            case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
+            case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
+            case SL_ANDROID_PCM_REPRESENTATION_FLOAT:
+                df_representation = &df_pcm->representation;
+                break;
+            default:
+                SL_LOGE("Cannot create audio player: unsupported representation: %d",
+                        df_pcm->representation);
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+            }; // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
             SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
             SLresult result = android_audioPlayer_validateChannelMask(df_pcm->channelMask,
@@ -970,11 +987,28 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             }
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
+                if (df_representation &&
+                        *df_representation != SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT) {
+                    goto default_err;
+                }
+                break;
             case SL_PCMSAMPLEFORMAT_FIXED_16:
             case SL_PCMSAMPLEFORMAT_FIXED_24:
+                if (df_representation &&
+                        *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT) {
+                    goto default_err;
+                }
+                break;
+            case SL_PCMSAMPLEFORMAT_FIXED_32:
+                if (df_representation
+                        && *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT
+                        && *df_representation != SL_ANDROID_PCM_REPRESENTATION_FLOAT) {
+                    goto default_err;
+                }
                 break;
                 // others
             default:
+            default_err:
                 // this should have already been rejected by checkDataFormat
                 SL_LOGE("Cannot create audio player: unsupported sample bit depth %u",
                         (SLuint32)df_pcm->bitsPerSample);
@@ -984,6 +1018,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case 8:
             case 16:
             case 24:
+            case 32:
                 break;
                 // others
             default:
@@ -1489,7 +1524,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
-                sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
+                sles_to_android_sampleFormat(df_pcm),                // format
                 sles_to_android_channelMaskOut(df_pcm->numChannels, df_pcm->channelMask),
                                                                      // channel mask
                 0,                                                   // frameCount

@@ -62,7 +62,8 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
-	libOpenSLES
+	libOpenSLES \
+	libnbaio
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
