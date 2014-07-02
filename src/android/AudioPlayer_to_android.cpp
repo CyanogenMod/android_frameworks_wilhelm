@@ -874,7 +874,7 @@ SLresult android_audioPlayer_validateChannelMask(uint32_t mask, int numChans) {
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
     // Are there the right number of channels in the mask?
-    if (popcount(mask) != numChans) {
+    if (audio_channel_count_from_out_mask(mask) != numChans) {
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
     // check against unsupported channels
