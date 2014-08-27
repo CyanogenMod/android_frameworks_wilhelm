@@ -212,6 +212,12 @@ static void audioRecorder_callback(int event, void* user, void *info) {
     //SL_LOGV("audioRecorder_callback(%d, %p, %p) entering", event, user, info);
 
     CAudioRecorder *ar = (CAudioRecorder *)user;
+
+    if (!android::CallbackProtector::enterCbIfOk(ar->mCallbackProtector)) {
+        // it is not safe to enter the callback (the track is about to go away)
+        return;
+    }
+
     void * callbackPContext = NULL;
 
     switch(event) {
@@ -289,6 +295,8 @@ static void audioRecorder_callback(int event, void* user, void *info) {
         break;
 
     }
+
+    ar->mCallbackProtector->exitCb();
 }
 
 
@@ -312,6 +320,7 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
         // microphone to simple buffer queue
         ar->mAndroidObjType = AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE;
         ar->mAudioRecord.clear();
+        ar->mCallbackProtector = new android::CallbackProtector();
         ar->mRecordSource = AUDIO_SOURCE_DEFAULT;
     } else {
         result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -430,14 +439,29 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
 
 //-----------------------------------------------------------------------------
+/**
+ * Called with a lock on AudioRecorder, and blocks until safe to destroy
+ */
+void android_audioRecorder_preDestroy(CAudioRecorder* ar) {
+    object_unlock_exclusive(&ar->mObject);
+    if (ar->mCallbackProtector != 0) {
+        ar->mCallbackProtector->requestCbExitAndWait();
+    }
+    object_lock_exclusive(&ar->mObject);
+}
+
+
+//-----------------------------------------------------------------------------
 void android_audioRecorder_destroy(CAudioRecorder* ar) {
     SL_LOGV("android_audioRecorder_destroy(%p) entering", ar);
 
     if (ar->mAudioRecord != 0) {
         ar->mAudioRecord->stop();
+        ar->mAudioRecord.clear();
     }
     // explicit destructor
     ar->mAudioRecord.~sp();
+    ar->mCallbackProtector.~sp();
 
 #ifdef MONITOR_RECORDING
     if (NULL != gMonitorFp) {
