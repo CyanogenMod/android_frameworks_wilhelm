@@ -165,9 +165,6 @@ LOCAL_C_INCLUDES:=                                                  \
         frameworks/native/include/media/openmax                     \
         $(call include-path-for, audio-effects)
 
-# __pthread_gettid
-LOCAL_C_INCLUDES += bionic/libc/private
-
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
 LOCAL_STATIC_LIBRARIES += \
