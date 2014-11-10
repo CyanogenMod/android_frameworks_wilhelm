@@ -1126,6 +1126,10 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                             (char*)df_mime->mimeType, XA_ANDROID_MIME_MP2TS);
                     return SL_RESULT_CONTENT_UNSUPPORTED;
                 }
+                if (pAudioPlayer->mAndroidObjType != AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE) {
+                    SL_LOGE("Invalid sink for container SL_CONTAINERTYPE_MPEG_TS");
+                    return SL_RESULT_PARAMETER_INVALID;
+                }
                 break;
             case SL_CONTAINERTYPE_RAW:
             case SL_CONTAINERTYPE_AAC:
@@ -1136,6 +1140,10 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                             (char*)df_mime->mimeType, df_mime->containerType,
                             SL_ANDROID_MIME_AACADTS);
                     return SL_RESULT_CONTENT_UNSUPPORTED;
+                }
+                if (pAudioPlayer->mAndroidObjType != AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE) {
+                    SL_LOGE("Invalid sink for container SL_CONTAINERTYPE_AAC");
+                    return SL_RESULT_PARAMETER_INVALID;
                 }
                 break;
             default:
