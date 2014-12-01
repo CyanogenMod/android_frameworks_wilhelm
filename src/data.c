@@ -380,7 +380,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 case 2:     // stereo
                 case 4:     // QUAD
                 case 6:     // 5.1
-                case 8:     // 8.1
+                case 8:     // 7.1
                     break;
                 case 0:     // unknown
                     result = SL_RESULT_PARAMETER_INVALID;
