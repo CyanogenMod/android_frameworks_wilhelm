@@ -169,7 +169,7 @@ LOCAL_C_INCLUDES:=                                                  \
         frameworks/native/include/media/openmax                     \
         $(call include-path-for, audio-effects)
 
-LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
+LOCAL_CFLAGS += -x c++ -std=gnu++11 -Wno-multichar -Wno-invalid-offsetof
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper        \
@@ -210,7 +210,7 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_MODULE := libOpenSLES
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -UNDEBUG \
+LOCAL_CFLAGS += -x c++ -std=gnu++11 -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DSL_API='__attribute__((visibility("default")))'
 LOCAL_SHARED_LIBRARIES := libwilhelm liblog
 include $(BUILD_SHARED_LIBRARY)
@@ -225,7 +225,7 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_MODULE := libOpenMAXAL
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -UNDEBUG \
+LOCAL_CFLAGS += -x c++ -std=gnu++11 -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DXA_API='__attribute__((visibility("default")))'
 LOCAL_SHARED_LIBRARIES := libwilhelm liblog
 include $(BUILD_SHARED_LIBRARY)
