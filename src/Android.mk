@@ -197,7 +197,6 @@ ifeq ($(TARGET_BUILD_VARIANT),userdebug)
         LOCAL_CFLAGS += -DUSERDEBUG_BUILD=1
 endif
 
-LOCAL_PRELINK_MODULE := false
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -208,7 +207,6 @@ LOCAL_C_INCLUDES:=                                                  \
         frameworks/av/media/libstagefright/include                \
         frameworks/native/include/media/openmax
 LOCAL_MODULE := libOpenSLES
-LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS += -x c++ -std=gnu++11 -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DSL_API='__attribute__((visibility("default")))'
@@ -223,7 +221,6 @@ LOCAL_C_INCLUDES:=                                                  \
         frameworks/av/media/libstagefright/include                \
         frameworks/native/include/media/openmax
 LOCAL_MODULE := libOpenMAXAL
-LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS += -x c++ -std=gnu++11 -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DXA_API='__attribute__((visibility("default")))'
