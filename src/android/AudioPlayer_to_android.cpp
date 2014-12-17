@@ -975,11 +975,11 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case SL_SAMPLINGRATE_32:
             case SL_SAMPLINGRATE_44_1:
             case SL_SAMPLINGRATE_48:
-                break;
             case SL_SAMPLINGRATE_64:
             case SL_SAMPLINGRATE_88_2:
             case SL_SAMPLINGRATE_96:
             case SL_SAMPLINGRATE_192:
+                break;
             default:
                 SL_LOGE("Cannot create audio player: unsupported sample rate %u milliHz",
                     (unsigned) df_pcm->samplesPerSec);
