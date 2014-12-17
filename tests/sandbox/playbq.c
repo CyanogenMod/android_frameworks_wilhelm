@@ -281,27 +281,12 @@ int main(int argc, char **argv)
     }
 
     // verify the file format
-    switch (sfinfo.channels) {
-    case 1:
-    case 2:
-        break;
-    default:
+    if (sfinfo.channels < 1 || sfinfo.channels > 12) {
         fprintf(stderr, "unsupported channel count %d\n", sfinfo.channels);
         goto close_sndfile;
     }
 
-    switch (sfinfo.samplerate) {
-    case  8000:
-    case 11025:
-    case 12000:
-    case 16000:
-    case 22050:
-    case 24000:
-    case 32000:
-    case 44100:
-    case 48000:
-        break;
-    default:
+    if (sfinfo.samplerate < 8000 || sfinfo.samplerate > 192000) {
         fprintf(stderr, "unsupported sample rate %d\n", sfinfo.samplerate);
         goto close_sndfile;
     }
@@ -321,8 +306,10 @@ int main(int argc, char **argv)
     case SF_FORMAT_PCM_U8:
         break;
     default:
-        fprintf(stderr, "unsupported sub-format 0x%x\n", sfinfo.format & SF_FORMAT_SUBMASK);
-        goto close_sndfile;
+        if (sfinfo.format != SF_FORMAT_WAV) {
+            fprintf(stderr, "unsupported sub-format 0x%x (0x%x)\n", sfinfo.format & SF_FORMAT_SUBMASK, sfinfo.format);
+            goto close_sndfile;
+        }
     }
 
     SLuint32 bitsPerSample;
@@ -399,8 +386,33 @@ int main(int argc, char **argv)
     format_pcm.sampleRate = sfinfo.samplerate * 1000;
     format_pcm.bitsPerSample = bitsPerSample;
     format_pcm.containerSize = format_pcm.bitsPerSample;
-    format_pcm.channelMask = 1 == format_pcm.numChannels ? SL_SPEAKER_FRONT_CENTER :
-            SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+
+    switch (format_pcm.numChannels) {
+        case 1:
+            format_pcm.channelMask = SL_SPEAKER_FRONT_CENTER;
+            break;
+        case 2:
+            format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+            break;
+        case 4:
+            format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT
+                                   | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT;
+            break;
+        case 6:
+            format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT
+                                   | SL_SPEAKER_FRONT_CENTER  | SL_SPEAKER_LOW_FREQUENCY
+                                   | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT;
+            break;
+        case 8:
+            format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT
+                                   | SL_SPEAKER_FRONT_CENTER  | SL_SPEAKER_LOW_FREQUENCY
+                                   | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT
+                                   | SL_SPEAKER_SIDE_LEFT | SL_SPEAKER_SIDE_RIGHT;
+            break;
+        default:
+            format_pcm.channelMask = 0;
+    }
+
     format_pcm.endianness = byteOrder;
     format_pcm.representation = transferFormat == AUDIO_FORMAT_PCM_FLOAT
             ? SL_ANDROID_PCM_REPRESENTATION_FLOAT : transferFormat == AUDIO_FORMAT_PCM_8_BIT
