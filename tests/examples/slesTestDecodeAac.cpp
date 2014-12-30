@@ -263,7 +263,8 @@ SLresult AndroidBufferQueueCallback(
         }
     } else if (filelen == 0) {
         // signal EOS to the decoder rather than just starving it
-        printf("Enqueue EOS: encoded frames=%zu, decoded frames=%zu\n", encodedFrames, decodedFrames);
+        printf("Enqueue EOS: encoded frames=%zu, decoded frames=%zu\n", encodedFrames,
+                decodedFrames);
         printf("You should now see %u ADTS completion%s followed by 1 EOS completion\n",
                 NB_BUFFERS_IN_ADTS_QUEUE - 1, NB_BUFFERS_IN_ADTS_QUEUE != 2 ? "s" : "");
         SLAndroidBufferItem msgEos;
