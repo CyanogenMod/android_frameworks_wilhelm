@@ -71,7 +71,7 @@ static android::MonoPipe *pipeWriter2;
 static int injectImpulse;
 
 // Called after audio recorder fills a buffer with data
-static void recorderCallback(SLAndroidSimpleBufferQueueItf caller, void *context)
+static void recorderCallback(SLAndroidSimpleBufferQueueItf caller __unused, void *context __unused)
 {
     SLresult result;
 
@@ -161,7 +161,7 @@ static void recorderCallback(SLAndroidSimpleBufferQueueItf caller, void *context
 
 
 // Called after audio player empties a buffer of data
-static void playerCallback(SLBufferQueueItf caller, void *context)
+static void playerCallback(SLBufferQueueItf caller __unused, void *context __unused)
 {
     SLresult result;
 
@@ -189,9 +189,9 @@ static void playerCallback(SLBufferQueueItf caller, void *context)
         // Also a Nyquist frequency signal was also insufficient, probably because
         // the response of output and/or input path was not adequate at high frequencies.
         // This short burst of a few cycles of square wave at Nyquist/4 was found to work well.
-        for (int i = 0; i < bufSizeInFrames / 8; i += 8) {
+        for (unsigned i = 0; i < bufSizeInFrames / 8; i += 8) {
             for (int j = 0; j < 8; j++) {
-                for (int k = 0; k < channels; k++) {
+                for (unsigned k = 0; k < channels; k++) {
                     ((short *)buffer)[(i+j)*channels+k] = j < 4 ? 0x7FFF : 0x8000;
                 }
             }

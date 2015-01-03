@@ -67,7 +67,7 @@ SLuint32 prefetch_status = SL_PREFETCHSTATUS_UNKNOWN;
 
 // Prefetch status callback
 
-void prefetch_callback(SLPrefetchStatusItf caller, void *context, SLuint32 event)
+void prefetch_callback(SLPrefetchStatusItf caller, void *context __unused, SLuint32 event)
 {
     SLresult result;
     assert(context == NULL);
@@ -99,7 +99,7 @@ void prefetch_callback(SLPrefetchStatusItf caller, void *context, SLuint32 event
 
 //-----------------------------------------------------------------
 /* PlayItf callback for an audio player, will be called for every SL_PLAYEVENT_HEADATNEWPOS event */
-void PlayEventCallback( SLPlayItf caller,  void *pContext, SLuint32 event)
+void PlayEventCallback( SLPlayItf caller __unused,  void *pContext, SLuint32 event __unused)
 {
     Context *context = (Context *) pContext;
     SLPlayItf playItf = context->playItf;

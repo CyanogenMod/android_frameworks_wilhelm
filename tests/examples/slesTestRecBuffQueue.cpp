@@ -93,7 +93,7 @@ typedef struct CallbackCntxt_ {
 /* Callback for recording buffer queue events */
 void RecCallback(
         SLRecordItf caller,
-        void *pContext,
+        void *pContext __unused,
         SLuint32 event)
 {
     if (SL_RECORDEVENT_HEADATNEWPOS & event) {

@@ -62,7 +62,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 //-----------------------------------------------------------------
 /* PlayItf callback for an audio player */
-void PlayEventCallback( SLPlayItf caller,  void *pContext, SLuint32 event)
+void PlayEventCallback( SLPlayItf caller __unused, void *pContext, SLuint32 event)
 {
     fprintf(stdout, "PlayEventCallback event = ");
     if (event & SL_PLAYEVENT_HEADATEND) {

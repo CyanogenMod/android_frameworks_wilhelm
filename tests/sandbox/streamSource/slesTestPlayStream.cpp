@@ -72,13 +72,13 @@ bool prefetchError = false;
 /* AndroidBufferQueueItf callback for an audio player */
 SLresult AndroidBufferQueueCallback(
         SLAndroidBufferQueueItf caller,
-        void *pCallbackContext,            /* input */
+        void *pCallbackContext __unused,   /* input */
         void *pBufferContext,              /* input */
-        void *pBufferData,                 /* input */
-        SLuint32 dataSize,                 /* input */
-        SLuint32 dataUsed,                 /* input */
-        const SLAndroidBufferItem *pItems, /* input */
-        SLuint32 itemsLength               /* input */)
+        void *pBufferData __unused,        /* input */
+        SLuint32 dataSize __unused,        /* input */
+        SLuint32 dataUsed __unused,        /* input */
+        const SLAndroidBufferItem *pItems __unused, /* input */
+        SLuint32 itemsLength __unused      /* input */)
 {
     // assert(BUFFER_SIZE <= dataSize);
 

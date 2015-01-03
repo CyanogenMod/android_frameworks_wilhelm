@@ -102,7 +102,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller, void *pContext, SLuint32
 //-----------------------------------------------------------------
 /* PlayItf callback for playback events */
 void PlayEventCallback(
-        SLPlayItf caller,
+        SLPlayItf caller __unused,
         void *pContext,
         SLuint32 event)
 {
