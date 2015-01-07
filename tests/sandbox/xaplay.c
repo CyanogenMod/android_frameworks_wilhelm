@@ -806,7 +806,7 @@ streamIndex, &mediaContainerInformation);
         if (pauseMs >= 0) {
             result = (*playerPlay)->GetPosition(playerPlay, &position);
             assert(XA_RESULT_SUCCESS == result);
-            if (position >= pauseMs) {
+            if ((int) position >= pauseMs) {
                 printf("Pausing for 5 seconds at position %u\n", position);
                 result = (*playerPlay)->SetPlayState(playerPlay, XA_PLAYSTATE_PAUSED);
                 assert(XA_RESULT_SUCCESS == result);
