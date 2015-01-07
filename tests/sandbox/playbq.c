@@ -27,14 +27,9 @@
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-#ifdef ANDROID
+#include <system/audio.h>
+#include <audio_utils/fifo.h>
 #include <audio_utils/sndfile.h>
-#else
-#include <sndfile.h>
-#endif
-
-#include <media/nbaio/MonoPipe.h>
-#include <media/nbaio/MonoPipeReader.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -90,8 +85,7 @@ static void squeeze24(const unsigned char *from, unsigned char *to, ssize_t n)
     }
 }
 
-static android::MonoPipeReader *pipeReader;
-static android::MonoPipe *pipeWriter;
+static audio_utils_fifo fifo;
 static unsigned underruns = 0;
 
 // This callback is called each time a buffer finishes playing
@@ -101,7 +95,7 @@ static void callback(SLBufferQueueItf bufq, void *param)
     assert(NULL == param);
     if (!eof) {
         void *buffer = (char *)buffers + framesPerBuffer * sfframesize * which;
-        ssize_t count = pipeReader->read(buffer, framesPerBuffer, (int64_t) -1);
+        ssize_t count = audio_utils_fifo_read(&fifo, buffer, framesPerBuffer);
         // on underrun from pipe, substitute silence
         if (0 >= count) {
             memset(buffer, 0, framesPerBuffer * sfframesize);
@@ -159,7 +153,7 @@ static void *file_reader_loop(void *arg __unused)
         }
         const unsigned char *ptr = (unsigned char *) temp;
         while (count > 0) {
-            ssize_t actual = pipeWriter->write(ptr, (size_t) count);
+            ssize_t actual = audio_utils_fifo_write(&fifo, ptr, (size_t) count);
             if (actual < 0) {
                 break;
             }
@@ -549,22 +543,10 @@ int main(int argc, char **argv)
     result = (*playerBufferQueue)->RegisterCallback(playerBufferQueue, callback, NULL);
     assert(SL_RESULT_SUCCESS == result);
 
-    // Create a NBAIO pipe for asynchronous data handling.  In this case,
-    // sample rate doesn't matter and audio_format just sets the transfer frame size.
-    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(
-            sfinfo.samplerate, sfinfo.channels,
-            transferFormat == AUDIO_FORMAT_PCM_8_BIT ? AUDIO_FORMAT_PCM_16_BIT :
-                    transferFormat == AUDIO_FORMAT_PCM_24_BIT_PACKED ?
-                            AUDIO_FORMAT_PCM_32_BIT : transferFormat);
-    pipeWriter = new android::MonoPipe(16384, nbaio_format, false /*writeCanBlock*/);
-    android::NBAIO_Format offer = nbaio_format;
-    size_t numCounterOffers = 0;
-    ssize_t neg = pipeWriter->negotiate(&offer, 1, NULL, numCounterOffers);
-    assert(0 == neg);
-    pipeReader = new android::MonoPipeReader(pipeWriter);
-    numCounterOffers = 0;
-    neg = pipeReader->negotiate(&offer, 1, NULL, numCounterOffers);
-    assert(0 == neg);
+    size_t frameSize = sfinfo.channels * audio_bytes_per_sample(transferFormat);
+#define FIFO_FRAMES 16384
+    void *fifoBuffer = malloc(FIFO_FRAMES * frameSize);
+    audio_utils_fifo_init(&fifo, FIFO_FRAMES, frameSize, fifoBuffer);
 
     // create thread to read from file
     pthread_t thread;
@@ -624,10 +606,22 @@ int main(int argc, char **argv)
                 deltaRate = abs(deltaRate);
             }
         }
+
     }
+
+    // wait for reader thread to exit
+    ok = pthread_join(thread, (void **) NULL);
+    assert(0 == ok);
+
+    // set the player's state to stopped
+    result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_STOPPED);
+    assert(SL_RESULT_SUCCESS == result);
 
     // destroy audio player
     (*playerObject)->Destroy(playerObject);
+
+    audio_utils_fifo_deinit(&fifo);
+    free(fifoBuffer);
 
     }
 
