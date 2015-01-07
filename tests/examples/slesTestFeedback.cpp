@@ -27,9 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <audio_utils/fifo.h>
 #include <audio_utils/sndfile.h>
-#include <media/nbaio/MonoPipe.h>
-#include <media/nbaio/MonoPipeReader.h>
 
 #define ASSERT_EQ(x, y) do { if ((x) == (y)) ; else { fprintf(stderr, "0x%x != 0x%x\n", \
     (unsigned) (x), (unsigned) (y)); assert((x) == (y)); } } while (0)
@@ -62,11 +61,10 @@ static SLBufferQueueItf playerBufferQueue;
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static android::MonoPipeReader *pipeReader;
-static android::MonoPipe *pipeWriter;
+static audio_utils_fifo fifo;
 
-static android::MonoPipeReader *pipeReader2;
-static android::MonoPipe *pipeWriter2;
+static audio_utils_fifo fifo2;
+static short *fifo2Buffer = NULL;
 
 static int injectImpulse;
 
@@ -89,7 +87,7 @@ static void recorderCallback(SLAndroidSimpleBufferQueueItf caller __unused, void
     }
 
 #if 1
-    ssize_t actual = pipeWriter->write(buffer, (size_t) bufSizeInFrames);
+    ssize_t actual = audio_utils_fifo_write(&fifo, buffer, (size_t) bufSizeInFrames);
     if (actual != (ssize_t) bufSizeInFrames) {
         write(1, "?", 1);
     }
@@ -97,8 +95,8 @@ static void recorderCallback(SLAndroidSimpleBufferQueueItf caller __unused, void
     // This is called by a realtime (SCHED_FIFO) thread,
     // and it is unsafe to do I/O as it could block for unbounded time.
     // Flash filesystem is especially notorious for blocking.
-    if (pipeWriter2 != NULL) {
-        actual = pipeWriter2->write(buffer, (size_t) bufSizeInFrames);
+    if (fifo2Buffer != NULL) {
+        actual = audio_utils_fifo_write(&fifo2, buffer, (size_t) bufSizeInFrames);
         if (actual != (ssize_t) bufSizeInFrames) {
             write(1, "?", 1);
         }
@@ -177,7 +175,7 @@ static void playerCallback(SLBufferQueueItf caller __unused, void *context __unu
     }
 
 #if 1
-    ssize_t actual = pipeReader->read(buffer, bufSizeInFrames, (int64_t) -1);
+    ssize_t actual = audio_utils_fifo_read(&fifo, buffer, bufSizeInFrames);
     if (actual != (ssize_t) bufSizeInFrames) {
         write(1, "/", 1);
         // on underrun from pipe, substitute silence
@@ -362,17 +360,10 @@ int main(int argc, char **argv)
     txFront = 0;
     txRear = 0;
 
-    const android::NBAIO_Format nbaio_format = android::Format_from_SR_C(sampleRate, channels,
-            AUDIO_FORMAT_PCM_16_BIT);
-    pipeWriter = new android::MonoPipe(1024, nbaio_format, false /*writeCanBlock*/);
-    android::NBAIO_Format offer = nbaio_format;
-    size_t numCounterOffers = 0;
-    ssize_t neg = pipeWriter->negotiate(&offer, 1, NULL, numCounterOffers);
-    assert(0 == neg);
-    pipeReader = new android::MonoPipeReader(pipeWriter);
-    numCounterOffers = 0;
-    neg = pipeReader->negotiate(&offer, 1, NULL, numCounterOffers);
-    assert(0 == neg);
+    size_t frameSize = channels * sizeof(short);
+#define FIFO_FRAMES 1024
+    short *fifoBuffer = new short[FIFO_FRAMES * channels];
+    audio_utils_fifo_init(&fifo, FIFO_FRAMES, frameSize, fifoBuffer);
 
     SNDFILE *sndfile;
     if (outFileName != NULL) {
@@ -384,15 +375,9 @@ int main(int argc, char **argv)
         info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
         sndfile = sf_open(outFileName, SFM_WRITE, &info);
         if (sndfile != NULL) {
-            pipeWriter2 = new android::MonoPipe(65536, nbaio_format, false /*writeCanBlock*/);
-            offer = nbaio_format;
-            numCounterOffers = 0;
-            neg = pipeWriter2->negotiate(&offer, 1, NULL, numCounterOffers);
-            assert(0 == neg);
-            pipeReader2 = new android::MonoPipeReader(pipeWriter2);
-            numCounterOffers = 0;
-            neg = pipeReader2->negotiate(&offer, 1, NULL, numCounterOffers);
-            assert(0 == neg);
+#define FIFO2_FRAMES 65536
+            fifo2Buffer = new short[FIFO2_FRAMES * channels];
+            audio_utils_fifo_init(&fifo2, FIFO2_FRAMES, frameSize, fifo2Buffer);
         } else {
             fprintf(stderr, "sf_open failed\n");
         }
@@ -562,10 +547,10 @@ int main(int argc, char **argv)
     do {
         for (int i = 0; i < 10; i++) {
             usleep(100000);
-            if (pipeReader2 != NULL) {
+            if (fifo2Buffer != NULL) {
                 for (;;) {
                     short buffer[bufSizeInFrames * channels];
-                    ssize_t actual = pipeReader2->read(buffer, bufSizeInFrames, (int64_t) -1);
+                    ssize_t actual = audio_utils_fifo_read(&fifo2, buffer, bufSizeInFrames);
                     if (actual <= 0)
                         break;
                     (void) sf_writef_short(sndfile, buffer, (sf_count_t) actual);
@@ -595,7 +580,12 @@ int main(int argc, char **argv)
 
     // Tear down the objects and exit
 cleanup:
+    audio_utils_fifo_deinit(&fifo);
+    delete[] fifoBuffer;
+
     if (sndfile != NULL) {
+        audio_utils_fifo_deinit(&fifo2);
+        delete[] fifo2Buffer;
         sf_close(sndfile);
     }
     if (NULL != playerObject) {
