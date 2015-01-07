@@ -387,10 +387,8 @@ int main(int argc, char* const argv[])
             "sink\n");
     fprintf(stdout, "Plays a sound and stops after its reported duration\n\n");
 
-    if (argc == 1) {
-        fprintf(stdout, "Usage: %s path \n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.ts\n",
-                argv[0], argv[0]);
+    if (argc != 2) {
+        fprintf(stdout, "Usage: %s path.ts\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
