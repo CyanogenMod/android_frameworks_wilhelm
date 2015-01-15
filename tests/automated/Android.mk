@@ -13,7 +13,6 @@ LOCAL_SRC_FILES:= \
     BufferQueue_test.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES \
 
 LOCAL_STATIC_LIBRARIES := \

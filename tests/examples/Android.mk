@@ -13,7 +13,6 @@ LOCAL_SRC_FILES:= \
 	slesTestRecBuffQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -37,7 +36,6 @@ LOCAL_SRC_FILES:= \
 	slesTestPlayFdPath.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -63,7 +61,6 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libaudioutils \
-	libutils \
 	libOpenSLES \
 	libnbaio
 
@@ -94,7 +91,6 @@ LOCAL_SRC_FILES:= \
 	slesTestSawtoothBufferQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -119,7 +115,6 @@ LOCAL_SRC_FILES:= \
 	slesTestEqFdPath.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -143,7 +138,6 @@ LOCAL_SRC_FILES:= \
 	slesTestEqOutputPath.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -167,7 +161,6 @@ LOCAL_SRC_FILES:= \
 	slesTestBassBoostPath.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -191,7 +184,6 @@ LOCAL_SRC_FILES:= \
 	slesTestVirtualizerPath.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -215,7 +207,6 @@ LOCAL_SRC_FILES:= \
 	slesTestEffectCapabilities.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -239,7 +230,6 @@ LOCAL_SRC_FILES:= \
 	slesTestSendToPresetReverb.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -263,7 +253,6 @@ LOCAL_SRC_FILES:= \
 	slesTestDecodeToBuffQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 ifeq ($(TARGET_OS),linux)
@@ -288,7 +277,6 @@ LOCAL_SRC_FILES:= \
 	slesTestDecodeAac.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := libcpustats
@@ -319,7 +307,6 @@ LOCAL_SRC_FILES:= \
 	xaVideoDecoderCapabilities.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils \
 	libOpenMAXAL
 
 ifeq ($(TARGET_OS),linux)
