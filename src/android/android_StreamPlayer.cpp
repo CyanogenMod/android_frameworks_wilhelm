@@ -389,7 +389,7 @@ void StreamPlayer::onPrepare() {
                     mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by app proxy");
-            } else if (mPlayer->setDataSource(mAppProxy /*IStreamSource*/) != NO_ERROR) {
+            } else if (mPlayer->setDataSource(static_cast<sp<IStreamSource>>(mAppProxy)) != NO_ERROR) {
                 SL_LOGE("setDataSource failed");
                 mPlayer.clear();
             }
