@@ -18,6 +18,8 @@
 #include "sles_allinclusive.h"
 #include "math.h"
 #include "utils/RefBase.h"
+#include "utils/String16.h"
+
 #include <audio_effects/effect_bassboost.h>
 #include <audio_effects/effect_equalizer.h>
 #include <audio_effects/effect_environmentalreverb.h>
@@ -621,7 +623,7 @@ bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& 
         const effect_uuid_t *type) {
     //SL_LOGV("android_fx_initEffectObj on session %d", sessionId);
 
-    effect = new android::AudioEffect(type, EFFECT_UUID_NULL,
+    effect = new android::AudioEffect(type, android::String16(), EFFECT_UUID_NULL,
             0,// priority
             0,// effect callback
             0,// callback data
@@ -761,6 +763,7 @@ SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid
     // create new effect
     android::AudioEffect* pFx = new android::AudioEffect(
             NULL, // not using type to create effect
+            android::String16(),
             (const effect_uuid_t*)pUuid,
             0,// priority
             0,// effect callback

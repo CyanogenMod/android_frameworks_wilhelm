@@ -18,6 +18,8 @@
 #include "sles_allinclusive.h"
 #include "android_prompts.h"
 
+#include <utils/String16.h>
+
 #include <system/audio.h>
 
 // use this flag to dump all recorded audio into a file
@@ -406,7 +408,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     audio_input_flags_t policy = AUDIO_INPUT_FLAG_FAST;
 
     // initialize platform-specific CAudioRecorder fields
-    ar->mAudioRecord = new android::AudioRecord();
+    ar->mAudioRecord = new android::AudioRecord(android::String16());
     ar->mAudioRecord->set(ar->mRecordSource, // source
             sles_to_android_sampleRate(ar->mSampleRateMilliHz), // sample rate in Hertz
             AUDIO_FORMAT_PCM_16_BIT,   //FIXME use format from buffer queue sink
