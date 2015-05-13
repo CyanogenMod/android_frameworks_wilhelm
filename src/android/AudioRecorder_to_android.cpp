@@ -409,7 +409,8 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord(android::String16());
-    ar->mAudioRecord->set(ar->mRecordSource, // source
+    android::status_t status = ar->mAudioRecord->set(
+            ar->mRecordSource,     // source
             sles_to_android_sampleRate(ar->mSampleRateMilliHz), // sample rate in Hertz
             AUDIO_FORMAT_PCM_16_BIT,   //FIXME use format from buffer queue sink
             sles_to_android_channelMaskIn(ar->mNumChannels, 0 /*no channel mask*/),
@@ -425,9 +426,12 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
                                    // transfer type
             policy);               // audio_input_flags_t
 
-    if (android::NO_ERROR != ar->mAudioRecord->initCheck()) {
-        SL_LOGE("android_audioRecorder_realize(%p) error creating AudioRecord object", ar);
+    if (android::NO_ERROR != status) {
+        SL_LOGE("android_audioRecorder_realize(%p) error creating AudioRecord object; status %d",
+                ar, status);
+        // FIXME should return a more specific result depending on status
         result = SL_RESULT_CONTENT_UNSUPPORTED;
+        ar->mAudioRecord.clear();
     }
 
 #ifdef MONITOR_RECORDING
