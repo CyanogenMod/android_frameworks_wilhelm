@@ -695,7 +695,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
             //  - SL_PREFETCHEVENT_FILLLEVELCHANGE with a level of 0
             //  - SL_PREFETCHEVENT_STATUSCHANGE with a status of SL_PREFETCHSTATUS_UNDERFLOW
             SL_LOGE(ERROR_PLAYER_PREFETCH_d, data1);
-            if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+            if (IsInterfaceInitialized(&ap->mObject, MPH_PREFETCHSTATUS)) {
                 ap->mPrefetchStatus.mLevel = 0;
                 ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
                 if (!(~ap->mPrefetchStatus.mCallbackEventsMask &
@@ -718,7 +718,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
     break;
 
     case android::GenericPlayer::kEventPrefetchFillLevelUpdate : {
-        if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+        if (!IsInterfaceInitialized(&ap->mObject, MPH_PREFETCHSTATUS)) {
             break;
         }
         slPrefetchCallback callback = NULL;
@@ -742,7 +742,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
     break;
 
     case android::GenericPlayer::kEventPrefetchStatusChange: {
-        if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+        if (!IsInterfaceInitialized(&ap->mObject, MPH_PREFETCHSTATUS)) {
             break;
         }
         slPrefetchCallback callback = NULL;
@@ -1257,7 +1257,7 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
             audioPlayer_dispatch_headAtEnd_lockPlay(ap, false /*set state to paused?*/, false);
 
             // signal underflow to prefetch status itf
-            if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+            if (IsInterfaceInitialized(&ap->mObject, MPH_PREFETCHSTATUS)) {
                 ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
                 ap->mPrefetchStatus.mLevel = 0;
                 // callback or no callback?
@@ -2055,7 +2055,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         // FIXME report and use the return code to the lock mechanism, which is where play state
         //   changes are updated (see object_unlock_exclusive_attributes())
-        aplayer_setPlayState(ap->mAPlayer, playState, &(ap->mAndroidObjState));
+        aplayer_setPlayState(ap->mAPlayer, playState, &ap->mAndroidObjState);
         break;
     default:
         SL_LOGE(ERROR_PLAYERSETPLAYSTATE_UNEXPECTED_OBJECT_TYPE_D, ap->mAndroidObjType);
@@ -2253,7 +2253,7 @@ void android_audioPlayer_bufferQueue_onRefilled_l(CAudioPlayer *ap) {
 
     // when the queue became empty, an underflow on the prefetch status itf was sent. Now the queue
     // has received new data, signal it has sufficient data
-    if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+    if (IsInterfaceInitialized(&ap->mObject, MPH_PREFETCHSTATUS)) {
         // we wouldn't have been called unless we were previously in the underflow state
         assert(SL_PREFETCHSTATUS_UNDERFLOW == ap->mPrefetchStatus.mStatus);
         assert(0 == ap->mPrefetchStatus.mLevel);
