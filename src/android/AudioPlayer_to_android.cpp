@@ -987,20 +987,20 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             }
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
-                if (df_representation &&
+                if (df_representation != NULL &&
                         *df_representation != SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT) {
                     goto default_err;
                 }
                 break;
             case SL_PCMSAMPLEFORMAT_FIXED_16:
             case SL_PCMSAMPLEFORMAT_FIXED_24:
-                if (df_representation &&
+                if (df_representation != NULL &&
                         *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT) {
                     goto default_err;
                 }
                 break;
             case SL_PCMSAMPLEFORMAT_FIXED_32:
-                if (df_representation
+                if (df_representation != NULL
                         && *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT
                         && *df_representation != SL_ANDROID_PCM_REPRESENTATION_FLOAT) {
                     goto default_err;
