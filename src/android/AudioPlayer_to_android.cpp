@@ -562,7 +562,7 @@ bool audioPlayer_isSupportedNonOutputMixSink(const SLDataSink* pAudioSink) {
  * returns the Android object type if the locator type combinations for the source and sinks
  *   are supported by this implementation, INVALID_TYPE otherwise
  */
-AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap) {
+AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(const CAudioPlayer *ap) {
 
     const SLDataSource *pAudioSrc = &ap->mDataSource.u.mSource;
     const SLDataSink *pAudioSnk = &ap->mDataSink.u.mSink;
@@ -941,8 +941,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         switch (sourceFormatType) {
         //     currently only PCM buffer queues are supported,
         case SL_ANDROID_DATAFORMAT_PCM_EX: {
-            SLAndroidDataFormat_PCM_EX *df_pcm =
-                    (SLAndroidDataFormat_PCM_EX *) pAudioSrc->pFormat;
+            const SLAndroidDataFormat_PCM_EX *df_pcm =
+                    (const SLAndroidDataFormat_PCM_EX *) pAudioSrc->pFormat;
             switch (df_pcm->representation) {
             case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
             case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
@@ -956,7 +956,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             }
             } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
-            SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
+            const SLDataFormat_PCM *df_pcm = (const SLDataFormat_PCM *) pAudioSrc->pFormat;
             SLresult result = android_audioPlayer_validateChannelMask(df_pcm->channelMask,
                                                                       df_pcm->numChannels);
             if (result != SL_RESULT_SUCCESS) {
