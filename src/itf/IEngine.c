@@ -448,7 +448,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     thiz->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
 
                     // These fields are set to real values by
-                    // android_audioRecorder_checkSourceSinkSupport.  Note that the data sink is
+                    // android_audioRecorder_checkSourceSink.  Note that the data sink is
                     // always PCM buffer queue, so we know the channel count and sample rate early.
                     thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
                     thiz->mSampleRateMilliHz = UNKNOWN_SAMPLERATE;
@@ -485,7 +485,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
-                    result = android_audioRecorder_checkSourceSinkSupport(thiz);
+                    result = android_audioRecorder_checkSourceSink(thiz);
                     if (SL_RESULT_SUCCESS != result) {
                         SL_LOGE("Cannot create AudioRecorder: invalid source or sink");
                         break;

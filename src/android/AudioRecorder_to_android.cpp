@@ -159,7 +159,7 @@ void audioRecorder_handleOverrun_lockRecord(CAudioRecorder* ar) {
 }
 
 //-----------------------------------------------------------------------------
-SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar) {
+SLresult android_audioRecorder_checkSourceSink(CAudioRecorder* ar) {
 
     const SLDataSource *pAudioSrc = &ar->mDataSource.u.mSource;
     const SLDataSink   *pAudioSnk = &ar->mDataSink.u.mSink;
