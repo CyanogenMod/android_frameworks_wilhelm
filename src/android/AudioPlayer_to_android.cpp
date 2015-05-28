@@ -954,7 +954,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                         df_pcm->representation);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
-            }; // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
+            } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
             SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
             SLresult result = android_audioPlayer_validateChannelMask(df_pcm->channelMask,
