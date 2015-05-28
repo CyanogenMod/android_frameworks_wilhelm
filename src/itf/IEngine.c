@@ -1201,8 +1201,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                             XAMediaContainerInformation *containerInfo =
                                     (XAMediaContainerInformation*)
                                         // always storing container info at index 0, as per spec
-                                        &(thiz->mStreamInfo.mStreamInfoTable.itemAt(0).
-                                                containerInfo);
+                                        &thiz->mStreamInfo.mStreamInfoTable.itemAt(0).containerInfo;
                             containerInfo->containerType = XA_CONTAINERTYPE_MPEG_TS;
                             // there are no streams at this stage
                             containerInfo->numStreams = 0;

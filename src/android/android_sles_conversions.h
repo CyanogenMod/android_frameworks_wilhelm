@@ -48,16 +48,16 @@ static inline audio_format_t sles_to_android_sampleFormat(const SLDataFormat_PCM
     switch (df_pcm->formatType) {
     case SL_DATAFORMAT_PCM:
         switch (df_pcm->containerSize) {
-            case 8:
-                return AUDIO_FORMAT_PCM_8_BIT;
-            case 16:
-                return AUDIO_FORMAT_PCM_16_BIT;
-            case 24:
-                return AUDIO_FORMAT_PCM_24_BIT_PACKED;
-            case 32:
-                return AUDIO_FORMAT_PCM_32_BIT;
-            default:
-                return AUDIO_FORMAT_INVALID;
+        case 8:
+            return AUDIO_FORMAT_PCM_8_BIT;
+        case 16:
+            return AUDIO_FORMAT_PCM_16_BIT;
+        case 24:
+            return AUDIO_FORMAT_PCM_24_BIT_PACKED;
+        case 32:
+            return AUDIO_FORMAT_PCM_32_BIT;
+        default:
+            return AUDIO_FORMAT_INVALID;
         }
     case SL_ANDROID_DATAFORMAT_PCM_EX:
         switch (((SLAndroidDataFormat_PCM_EX *)df_pcm)->representation) {

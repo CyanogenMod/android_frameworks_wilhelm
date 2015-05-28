@@ -124,7 +124,7 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, CAud
             // room to consume the whole or rest of the decoded data in one shot
             ap->mBufferQueue.mSizeConsumed += size;
             // consume data but no callback to the BufferQueue interface here
-            memcpy (pDest, data, size);
+            memcpy(pDest, data, size);
             sizeConsumed = size;
         } else {
             // push as much as possible of the decoded data into the buffer queue
@@ -140,7 +140,7 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, CAud
             ap->mBufferQueue.mState.count--;
             ap->mBufferQueue.mState.playIndex++;
             // consume data
-            memcpy (pDest, data, sizeConsumed);
+            memcpy(pDest, data, sizeConsumed);
             // data has been copied to the buffer, and the buffer queue state has been updated
             // we will notify the client if applicable
             callback = ap->mBufferQueue.mCallback;
