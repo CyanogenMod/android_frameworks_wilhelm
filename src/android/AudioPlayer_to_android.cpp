@@ -966,22 +966,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                 return result;
             }
 
-            switch (df_pcm->samplesPerSec) {
-            case SL_SAMPLINGRATE_8:
-            case SL_SAMPLINGRATE_11_025:
-            case SL_SAMPLINGRATE_12:
-            case SL_SAMPLINGRATE_16:
-            case SL_SAMPLINGRATE_22_05:
-            case SL_SAMPLINGRATE_24:
-            case SL_SAMPLINGRATE_32:
-            case SL_SAMPLINGRATE_44_1:
-            case SL_SAMPLINGRATE_48:
-                break;
-            case SL_SAMPLINGRATE_64:
-            case SL_SAMPLINGRATE_88_2:
-            case SL_SAMPLINGRATE_96:
-            case SL_SAMPLINGRATE_192:
-            default:
+            if (df_pcm->samplesPerSec < SL_SAMPLINGRATE_8 ||
+                    df_pcm->samplesPerSec > SL_SAMPLINGRATE_192) {
                 SL_LOGE("Cannot create audio player: unsupported sample rate %u milliHz",
                     (unsigned) df_pcm->samplesPerSec);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
