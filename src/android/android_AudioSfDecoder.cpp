@@ -524,7 +524,7 @@ void AudioSfDecoder::onDecode() {
     //-------------------------------- Handle return of decode
     if (err != OK) {
         bool continueDecoding = false;
-        switch(err) {
+        switch (err) {
             case ERROR_END_OF_STREAM:
                 if (0 < mDurationUsec) {
                     Mutex::Autolock _l(mTimeLock);

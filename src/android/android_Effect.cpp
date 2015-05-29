@@ -697,7 +697,7 @@ SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects) 
             android::AudioEffect::queryNumberEffects((uint32_t*)pNumSupportedAudioEffects);
 
     SLresult result = SL_RESULT_SUCCESS;
-    switch(status) {
+    switch (status) {
         case android::NO_ERROR:
             result = SL_RESULT_SUCCESS;
             break;
@@ -731,7 +731,7 @@ SLresult android_genericFx_queryEffect(SLuint32 index, effect_descriptor_t* pDes
 
     SLresult result = SL_RESULT_SUCCESS;
     if (android::NO_ERROR != status) {
-        switch(status) {
+        switch (status) {
         case android::PERMISSION_DENIED:
             result = SL_RESULT_PERMISSION_DENIED;
             break;
