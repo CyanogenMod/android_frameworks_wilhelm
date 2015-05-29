@@ -1305,8 +1305,13 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
         audioTrack_handleUnderrun_lockPlay(ap);
         break;
 
+    case android::AudioTrack::EVENT_NEW_IAUDIOTRACK:
+        // ignore for now
+        break;
+
     case android::AudioTrack::EVENT_BUFFER_END:
     case android::AudioTrack::EVENT_LOOP_END:
+    case android::AudioTrack::EVENT_STREAM_END:
         // These are unexpected so fall through
     default:
         // FIXME where does the notification of SL_PLAYEVENT_HEADMOVING fit?
