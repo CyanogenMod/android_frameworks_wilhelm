@@ -155,26 +155,56 @@ SLresult android_audioRecorder_checkSourceSink(CAudioRecorder* ar) {
     const SLDataSource *pAudioSrc = &ar->mDataSource.u.mSource;
     const SLDataSink   *pAudioSnk = &ar->mDataSink.u.mSink;
 
-    // Sink check:
-    // only buffer queue sinks are supported, regardless of the data source
-    if (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE != *(SLuint32 *)pAudioSnk->pLocator) {
-        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_ANDROIDSIMPLEBUFFERQUEUE);
-        return SL_RESULT_PARAMETER_INVALID;
-    } else {
-        // only PCM buffer queues are supported
-        SLuint32 formatType = *(SLuint32 *)pAudioSnk->pFormat;
-        if (SL_DATAFORMAT_PCM == formatType) {
-            SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *)ar->mDataSink.u.mSink.pFormat;
-            ar->mSampleRateMilliHz = df_pcm->samplesPerSec;
+    const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
+    const SLuint32 sinkFormatType = *(SLuint32 *)pAudioSnk->pFormat;
+
+    const SLuint32 *df_representation = NULL; // pointer to representation field, if it exists
+
+    // sink must be an Android simple buffer queue with PCM data format
+    switch (sinkLocatorType) {
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE: {
+        switch (sinkFormatType) {
+        case SL_ANDROID_DATAFORMAT_PCM_EX: {
+            const SLAndroidDataFormat_PCM_EX *df_pcm =
+                    (SLAndroidDataFormat_PCM_EX *) pAudioSnk->pFormat;
+            switch (df_pcm->representation) {
+            case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
+            case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
+            case SL_ANDROID_PCM_REPRESENTATION_FLOAT:
+                df_representation = &df_pcm->representation;
+                break;
+            default:
+                SL_LOGE("Cannot create audio recorder: unsupported representation: %d",
+                        df_pcm->representation);
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+        } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
+        case SL_DATAFORMAT_PCM: {
+            const SLDataFormat_PCM *df_pcm = (const SLDataFormat_PCM *) pAudioSnk->pFormat;
+            // FIXME validate channel mask and number of channels
+
+            if (df_pcm->samplesPerSec < SL_SAMPLINGRATE_8 ||
+                    df_pcm->samplesPerSec > SL_SAMPLINGRATE_192) {
+                SL_LOGE("Cannot create audio recorder: unsupported sample rate %u milliHz",
+                    (unsigned) df_pcm->samplesPerSec);
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+
             ar->mNumChannels = df_pcm->numChannels;
+            ar->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
             SL_LOGV("AudioRecorder requested sample rate = %u mHz, %u channel(s)",
                     ar->mSampleRateMilliHz, ar->mNumChannels);
-        }
-        else {
+            // FIXME validates bitsPerSample
+            } break;
+        default:
             SL_LOGE(ERROR_RECORDER_SINK_FORMAT_MUST_BE_PCM);
             return SL_RESULT_PARAMETER_INVALID;
-        }
-    }
+        }   // switch (sourceFormatType)
+        } break;    // case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
+    default:
+        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_ANDROIDSIMPLEBUFFERQUEUE);
+        return SL_RESULT_PARAMETER_INVALID;
+    }   // switch (sourceLocatorType)
 
     // Source check:
     // only input device sources are supported
@@ -227,18 +257,19 @@ static void audioRecorder_callback(int event, void* user, void *info) {
             BufferHeader *oldFront = ar->mBufferQueue.mFront;
             BufferHeader *newFront = &oldFront[1];
 
-            // FIXME handle 8bit based on buffer format
-            short *pDest = (short*)((char *)oldFront->mBuffer + ar->mBufferQueue.mSizeConsumed);
-            if (ar->mBufferQueue.mSizeConsumed + pBuff->size < oldFront->mSize) {
+            size_t availSink = oldFront->mSize - ar->mBufferQueue.mSizeConsumed;
+            size_t availSource = pBuff->size;
+            size_t bytesToCopy = availSink < availSource ? availSink : availSource;
+            void *pDest = (char *)oldFront->mBuffer + ar->mBufferQueue.mSizeConsumed;
+            memcpy(pDest, pBuff->raw, bytesToCopy);
+
+            if (bytesToCopy < availSink) {
                 // can't consume the whole or rest of the buffer in one shot
-                ar->mBufferQueue.mSizeConsumed += pBuff->size;
-                // leave pBuff->size untouched
-                // consume data
-                // FIXME can we avoid holding the lock during the copy?
-                memcpy (pDest, pBuff->i16, pBuff->size);
+                ar->mBufferQueue.mSizeConsumed += availSource;
+                // pBuff->size is already equal to bytesToCopy in this case
             } else {
                 // finish pushing the buffer or push the buffer in one shot
-                pBuff->size = oldFront->mSize - ar->mBufferQueue.mSizeConsumed;
+                pBuff->size = bytesToCopy;
                 ar->mBufferQueue.mSizeConsumed = 0;
                 if (newFront == &ar->mBufferQueue.mArray[ar->mBufferQueue.mNumBuffers + 1]) {
                     newFront = ar->mBufferQueue.mArray;
@@ -247,21 +278,20 @@ static void audioRecorder_callback(int event, void* user, void *info) {
 
                 ar->mBufferQueue.mState.count--;
                 ar->mBufferQueue.mState.playIndex++;
-                // consume data
-                // FIXME can we avoid holding the lock during the copy?
-                memcpy (pDest, pBuff->i16, pBuff->size);
+
                 // data has been copied to the buffer, and the buffer queue state has been updated
                 // we will notify the client if applicable
                 callback = ar->mBufferQueue.mCallback;
                 // save callback data
                 callbackPContext = ar->mBufferQueue.mContext;
             }
-        } else {
+        } else { // empty queue
             // no destination to push the data
             pBuff->size = 0;
         }
 
         interface_unlock_exclusive(&ar->mBufferQueue);
+
         // notify client
         if (NULL != callback) {
             (*callback)(&ar->mBufferQueue.mItf, callbackPContext);
@@ -385,39 +415,39 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
-    // initialize platform-independent CAudioRecorder fields
-    if (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE != ar->mDataSink.mLocator.mLocatorType) {
-        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_ANDROIDSIMPLEBUFFERQUEUE);
-        return SL_RESULT_CONTENT_UNSUPPORTED;
-    }
+    // already checked in created and checkSourceSink
+    assert(ar->mDataSink.mLocator.mLocatorType == SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE);
+
+    const SLDataLocator_BufferQueue *dl_bq = &ar->mDataSink.mLocator.mBufferQueue;
+    const SLDataFormat_PCM *df_pcm = &ar->mDataSink.mFormat.mPCM;
+
     //  the following platform-independent fields have been initialized in CreateAudioRecorder()
     //    ar->mNumChannels
     //    ar->mSampleRateMilliHz
 
-    SL_LOGV("new AudioRecord %u channels, %u mHz", ar->mNumChannels, ar->mSampleRateMilliHz);
+    uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
     // currently nothing analogous to canUseFastTrack() for recording
     audio_input_flags_t policy = AUDIO_INPUT_FLAG_FAST;
 
     // initialize platform-specific CAudioRecorder fields
-    ar->mAudioRecord = new android::AudioRecord(android::String16());
-    android::status_t status = ar->mAudioRecord->set(
+    ar->mAudioRecord = new android::AudioRecord(
             ar->mRecordSource,     // source
-            sles_to_android_sampleRate(ar->mSampleRateMilliHz), // sample rate in Hertz
-            AUDIO_FORMAT_PCM_16_BIT,   //FIXME use format from buffer queue sink
-            sles_to_android_channelMaskIn(ar->mNumChannels, 0 /*no channel mask*/),
-                                   // channel config
-            0,                     //frameCount min
+            sampleRate,            // sample rate in Hertz
+            sles_to_android_sampleFormat(df_pcm),               // format
+            sles_to_android_channelMaskIn(df_pcm->numChannels, df_pcm->channelMask),
+                                   // channel mask
+            android::String16(),   // app ops
+            0,                     // frameCount
             audioRecorder_callback,// callback_t
             (void*)ar,             // user, callback data, here the AudioRecorder
             0,                     // notificationFrames
-            false,                 // threadCanCallJava, note: this will prevent direct Java
-                                   //   callbacks, but we don't want them in the recording loop
             0,                     // session ID
             android::AudioRecord::TRANSFER_CALLBACK,
                                    // transfer type
             policy);               // audio_input_flags_t
 
+    android::status_t status = ar->mAudioRecord->initCheck();
     if (android::NO_ERROR != status) {
         SL_LOGE("android_audioRecorder_realize(%p) error creating AudioRecord object; status %d",
                 ar, status);
