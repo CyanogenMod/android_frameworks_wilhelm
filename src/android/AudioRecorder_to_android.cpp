@@ -281,6 +281,13 @@ static void audioRecorder_callback(int event, void* user, void *info) {
         audioRecorder_handleNewPos_lockRecord(ar);
         break;
 
+    case android::AudioRecord::EVENT_NEW_IAUDIORECORD:
+        // ignore for now
+        break;
+
+    default:
+        SL_LOGE("Encountered unknown AudioRecord event %d for CAudioRecord %p", event, ar);
+        break;
     }
 
     ar->mCallbackProtector->exitCb();
