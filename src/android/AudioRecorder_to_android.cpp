@@ -22,15 +22,6 @@
 
 #include <system/audio.h>
 
-// use this flag to dump all recorded audio into a file
-//#define MONITOR_RECORDING
-#ifdef MONITOR_RECORDING
-#define MONITOR_TARGET "/sdcard/monitor.raw"
-#include <stdio.h>
-static FILE* gMonitorFp = NULL;
-#endif
-
-
 #define KEY_RECORDING_SOURCE_PARAMSIZE  sizeof(SLuint32)
 #define KEY_RECORDING_PRESET_PARAMSIZE  sizeof(SLuint32)
 
@@ -245,9 +236,6 @@ static void audioRecorder_callback(int event, void* user, void *info) {
                 // consume data
                 // FIXME can we avoid holding the lock during the copy?
                 memcpy (pDest, pBuff->i16, pBuff->size);
-#ifdef MONITOR_RECORDING
-                if (NULL != gMonitorFp) { fwrite(pBuff->i16, pBuff->size, 1, gMonitorFp); }
-#endif
             } else {
                 // finish pushing the buffer or push the buffer in one shot
                 pBuff->size = oldFront->mSize - ar->mBufferQueue.mSizeConsumed;
@@ -262,9 +250,6 @@ static void audioRecorder_callback(int event, void* user, void *info) {
                 // consume data
                 // FIXME can we avoid holding the lock during the copy?
                 memcpy (pDest, pBuff->i16, pBuff->size);
-#ifdef MONITOR_RECORDING
-                if (NULL != gMonitorFp) { fwrite(pBuff->i16, pBuff->size, 1, gMonitorFp); }
-#endif
                 // data has been copied to the buffer, and the buffer queue state has been updated
                 // we will notify the client if applicable
                 callback = ar->mBufferQueue.mCallback;
@@ -434,12 +419,6 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
         ar->mAudioRecord.clear();
     }
 
-#ifdef MONITOR_RECORDING
-    gMonitorFp = fopen(MONITOR_TARGET, "w");
-    if (NULL == gMonitorFp) { SL_LOGE("error opening %s", MONITOR_TARGET); }
-    else { SL_LOGE("recording to %s", MONITOR_TARGET); } // SL_LOGE so it's always displayed
-#endif
-
     return result;
 }
 
@@ -468,13 +447,6 @@ void android_audioRecorder_destroy(CAudioRecorder* ar) {
     // explicit destructor
     ar->mAudioRecord.~sp();
     ar->mCallbackProtector.~sp();
-
-#ifdef MONITOR_RECORDING
-    if (NULL != gMonitorFp) {
-        fclose(gMonitorFp);
-        gMonitorFp = NULL;
-    }
-#endif
 }
 
 
