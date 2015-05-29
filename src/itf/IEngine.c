@@ -60,7 +60,7 @@ static SLresult initializeAndroidBufferQueueMembers(CAudioPlayer *ap) {
         // initialize ABQ buffer type
         // assert below has been checked in android_audioPlayer_checkSourceSink
         assert(SL_DATAFORMAT_MIME == ap->mDataSource.mFormat.mFormatType);
-        switch(ap->mDataSource.mFormat.mMIME.containerType) {
+        switch (ap->mDataSource.mFormat.mMIME.containerType) {
           case SL_CONTAINERTYPE_MPEG_TS:
             ap->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeMpeg2Ts;
             break;
@@ -317,7 +317,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
                     }
 #ifdef ANDROID
-                    switch(thiz->mDataSink.mLocator.mLocatorType) {
+                    switch (thiz->mDataSink.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
                         usesSimpleBufferQueue = true;

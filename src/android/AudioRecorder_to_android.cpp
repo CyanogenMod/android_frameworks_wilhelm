@@ -222,7 +222,7 @@ static void audioRecorder_callback(int event, void* user, void *info) {
 
     void * callbackPContext = NULL;
 
-    switch(event) {
+    switch (event) {
     case android::AudioRecord::EVENT_MORE_DATA: {
         slBufferQueueCallback callback = NULL;
         android::AudioRecord::Buffer* pBuff = (android::AudioRecord::Buffer*)info;
