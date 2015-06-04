@@ -969,16 +969,9 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             // FIXME confirm the following
             // df_pcm->channelMask: the earlier platform-independent check and the
             //     upcoming check by sles_to_android_channelMaskOut are sufficient
-            switch (df_pcm->endianness) {
-            case SL_BYTEORDER_LITTLEENDIAN:
-                break;
-            case SL_BYTEORDER_BIGENDIAN:
-                SL_LOGE("Cannot create audio player: unsupported big-endian byte order");
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-                // native is proposed but not yet in spec
-            default:
-                SL_LOGE("Cannot create audio player: unsupported byte order %u",
-                    (unsigned) df_pcm->endianness);
+
+            if (df_pcm->endianness != pAudioPlayer->mObject.mEngine->mEngine.mNativeEndianness) {
+                SL_LOGE("Cannot create audio player: unsupported byte order %u", df_pcm->endianness);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             } //case SL_DATAFORMAT_PCM

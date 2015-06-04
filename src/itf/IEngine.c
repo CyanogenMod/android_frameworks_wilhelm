@@ -16,6 +16,7 @@
 
 /* Engine implementation */
 
+#include <endian.h>
 #include "sles_allinclusive.h"
 
 
@@ -997,6 +998,11 @@ void IEngine_init(void *self)
     }
     thiz->mShutdown = SL_BOOLEAN_FALSE;
     thiz->mShutdownAck = SL_BOOLEAN_FALSE;
+#if _BYTE_ORDER == _BIG_ENDIAN
+    thiz->mNativeEndianness = SL_BYTEORDER_BIGENDIAN;
+#else
+    thiz->mNativeEndianness = SL_BYTEORDER_LITTLEENDIAN;
+#endif
 }
 
 void IEngine_deinit(void *self)

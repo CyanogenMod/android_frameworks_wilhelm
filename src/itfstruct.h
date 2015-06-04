@@ -300,6 +300,7 @@ typedef struct Engine_interface {
     SLboolean mShutdown;
     SLboolean mShutdownAck;
     // SLuint32 mVersion;      // 0xXXYYZZ where XX=major, YY=minor, ZZ=step
+    SLuint32 mNativeEndianness; // one of SL_BYTEORDER_LITTLEENDIAN or SL_BYTEORDER_BIGENDIAN
 } IEngine;
 
 typedef struct {

@@ -177,6 +177,12 @@ SLresult android_audioRecorder_checkSourceSink(CAudioRecorder* ar) {
             // checkDataFormat already checked sample rate
 
             ar->mNumChannels = df_pcm->numChannels;
+
+            if (df_pcm->endianness != ar->mObject.mEngine->mEngine.mNativeEndianness) {
+                SL_LOGE("Cannot create audio recorder: unsupported byte order %u", df_pcm->endianness);
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+
             ar->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
             SL_LOGV("AudioRecorder requested sample rate = %u mHz, %u channel(s)",
                     ar->mSampleRateMilliHz, ar->mNumChannels);
