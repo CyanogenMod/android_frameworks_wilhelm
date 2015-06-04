@@ -167,28 +167,14 @@ SLresult android_audioRecorder_checkSourceSink(CAudioRecorder* ar) {
         case SL_ANDROID_DATAFORMAT_PCM_EX: {
             const SLAndroidDataFormat_PCM_EX *df_pcm =
                     (SLAndroidDataFormat_PCM_EX *) pAudioSnk->pFormat;
-            switch (df_pcm->representation) {
-            case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
-            case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
-            case SL_ANDROID_PCM_REPRESENTATION_FLOAT:
-                df_representation = &df_pcm->representation;
-                break;
-            default:
-                SL_LOGE("Cannot create audio recorder: unsupported representation: %d",
-                        df_pcm->representation);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
+            // checkDataFormat() already checked representation
+            df_representation = &df_pcm->representation;
         } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
             const SLDataFormat_PCM *df_pcm = (const SLDataFormat_PCM *) pAudioSnk->pFormat;
             // FIXME validate channel mask and number of channels
 
-            if (df_pcm->samplesPerSec < SL_SAMPLINGRATE_8 ||
-                    df_pcm->samplesPerSec > SL_SAMPLINGRATE_192) {
-                SL_LOGE("Cannot create audio recorder: unsupported sample rate %u milliHz",
-                    (unsigned) df_pcm->samplesPerSec);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
+            // checkDataFormat already checked sample rate
 
             ar->mNumChannels = df_pcm->numChannels;
             ar->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES

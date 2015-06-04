@@ -949,17 +949,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         case SL_ANDROID_DATAFORMAT_PCM_EX: {
             const SLAndroidDataFormat_PCM_EX *df_pcm =
                     (const SLAndroidDataFormat_PCM_EX *) pAudioSrc->pFormat;
-            switch (df_pcm->representation) {
-            case SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT:
-            case SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT:
-            case SL_ANDROID_PCM_REPRESENTATION_FLOAT:
-                df_representation = &df_pcm->representation;
-                break;
-            default:
-                SL_LOGE("Cannot create audio player: unsupported representation: %d",
-                        df_pcm->representation);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
+            // checkDataFormat() already checked representation
+            df_representation = &df_pcm->representation;
             } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
             const SLDataFormat_PCM *df_pcm = (const SLDataFormat_PCM *) pAudioSrc->pFormat;
@@ -971,53 +962,9 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                 return result;
             }
 
-            if (df_pcm->samplesPerSec < SL_SAMPLINGRATE_8 ||
-                    df_pcm->samplesPerSec > SL_SAMPLINGRATE_192) {
-                SL_LOGE("Cannot create audio player: unsupported sample rate %u milliHz",
-                    (unsigned) df_pcm->samplesPerSec);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            switch (df_pcm->bitsPerSample) {
-            case SL_PCMSAMPLEFORMAT_FIXED_8:
-                if (df_representation != NULL &&
-                        *df_representation != SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT) {
-                    goto default_err;
-                }
-                break;
-            case SL_PCMSAMPLEFORMAT_FIXED_16:
-            case SL_PCMSAMPLEFORMAT_FIXED_24:
-                if (df_representation != NULL &&
-                        *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT) {
-                    goto default_err;
-                }
-                break;
-            case SL_PCMSAMPLEFORMAT_FIXED_32:
-                if (df_representation != NULL
-                        && *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT
-                        && *df_representation != SL_ANDROID_PCM_REPRESENTATION_FLOAT) {
-                    goto default_err;
-                }
-                break;
-                // others
-            default:
-            default_err:
-                // this should have already been rejected by checkDataFormat
-                SL_LOGE("Cannot create audio player: unsupported sample bit depth %u",
-                        (SLuint32)df_pcm->bitsPerSample);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            switch (df_pcm->containerSize) {
-            case 8:
-            case 16:
-            case 24:
-            case 32:
-                break;
-                // others
-            default:
-                SL_LOGE("Cannot create audio player: unsupported container size %u",
-                    (unsigned) df_pcm->containerSize);
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
+            // checkDataFormat() already checked sample rate
+
+            // checkDataFormat() already checked bits per sample, container size, and representation
 
             // FIXME confirm the following
             // df_pcm->channelMask: the earlier platform-independent check and the
