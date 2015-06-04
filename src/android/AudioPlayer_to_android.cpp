@@ -1053,8 +1053,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         switch (sourceFormatType) {
         case SL_DATAFORMAT_MIME:
             break;
-        case SL_DATAFORMAT_PCM:
-        case XA_DATAFORMAT_RAWIMAGE:
+        default:
             SL_LOGE("Cannot create audio player with SL_DATALOCATOR_URI data source without "
                 "SL_DATAFORMAT_MIME format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
@@ -1074,18 +1073,10 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         switch (sourceFormatType) {
         case SL_DATAFORMAT_MIME:
             break;
-        case SL_DATAFORMAT_PCM:
-            // FIXME implement
-            SL_LOGD("[ FIXME implement PCM FD data sources ]");
-            break;
-        case XA_DATAFORMAT_RAWIMAGE:
-            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_ANDROIDFD data source "
-                "without SL_DATAFORMAT_MIME or SL_DATAFORMAT_PCM format");
-            return SL_RESULT_CONTENT_UNSUPPORTED;
         default:
-            // invalid data format is detected earlier
-            assert(false);
-            return SL_RESULT_INTERNAL_ERROR;
+            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_ANDROIDFD data source "
+                "without SL_DATAFORMAT_MIME format");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
         } // switch (sourceFormatType)
         if ((sinkLocatorType != SL_DATALOCATOR_OUTPUTMIX) &&
                 !audioPlayer_isSupportedNonOutputMixSink(pAudioSnk)) {
