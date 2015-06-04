@@ -395,27 +395,11 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 }
 
                 // check the sampling rate
-                switch (pDataFormat->mPCM.samplesPerSec) {
-                case SL_SAMPLINGRATE_8:
-                case SL_SAMPLINGRATE_11_025:
-                case SL_SAMPLINGRATE_12:
-                case SL_SAMPLINGRATE_16:
-                case SL_SAMPLINGRATE_22_05:
-                case SL_SAMPLINGRATE_24:
-                case SL_SAMPLINGRATE_32:
-                case SL_SAMPLINGRATE_44_1:
-                case SL_SAMPLINGRATE_48:
-                case SL_SAMPLINGRATE_64:
-                case SL_SAMPLINGRATE_88_2:
-                case SL_SAMPLINGRATE_96:
-                case SL_SAMPLINGRATE_192:
-                    break;
-                case 0:
+                if (pDataFormat->mPCM.samplesPerSec == 0) {
                     result = SL_RESULT_PARAMETER_INVALID;
-                    break;
-                default:
+                } else if (pDataFormat->mPCM.samplesPerSec < SL_SAMPLINGRATE_8 ||
+                        pDataFormat->mPCM.samplesPerSec > SL_SAMPLINGRATE_192) {
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
-                    break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
                     SL_LOGE("%s: samplesPerSec=%u", name, pDataFormat->mPCM.samplesPerSec);
