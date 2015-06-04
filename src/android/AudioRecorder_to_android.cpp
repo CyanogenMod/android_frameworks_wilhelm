@@ -179,14 +179,23 @@ SLresult android_audioRecorder_checkSourceSink(CAudioRecorder* ar) {
             ar->mNumChannels = df_pcm->numChannels;
 
             if (df_pcm->endianness != ar->mObject.mEngine->mEngine.mNativeEndianness) {
-                SL_LOGE("Cannot create audio recorder: unsupported byte order %u", df_pcm->endianness);
+                SL_LOGE("Cannot create audio recorder: unsupported byte order %u",
+                        df_pcm->endianness);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
 
             ar->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
             SL_LOGV("AudioRecorder requested sample rate = %u mHz, %u channel(s)",
                     ar->mSampleRateMilliHz, ar->mNumChannels);
-            // FIXME validates bitsPerSample
+
+            // we don't support container size != sample depth
+            if (df_pcm->containerSize != df_pcm->bitsPerSample) {
+                SL_LOGE("Cannot create audio recorder: unsupported container size %u bits for "
+                        "sample depth %u bits",
+                        df_pcm->containerSize, (SLuint32)df_pcm->bitsPerSample);
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+
             } break;
         default:
             SL_LOGE(ERROR_RECORDER_SINK_FORMAT_MUST_BE_PCM);

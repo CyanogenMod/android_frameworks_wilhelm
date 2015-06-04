@@ -953,6 +953,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             df_representation = &df_pcm->representation;
             } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
+            // checkDataFormat() already did generic checks, now do the Android-specific checks
             const SLDataFormat_PCM *df_pcm = (const SLDataFormat_PCM *) pAudioSrc->pFormat;
             SLresult result = android_audioPlayer_validateChannelMask(df_pcm->channelMask,
                                                                       df_pcm->numChannels);
@@ -971,9 +972,19 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             //     upcoming check by sles_to_android_channelMaskOut are sufficient
 
             if (df_pcm->endianness != pAudioPlayer->mObject.mEngine->mEngine.mNativeEndianness) {
-                SL_LOGE("Cannot create audio player: unsupported byte order %u", df_pcm->endianness);
+                SL_LOGE("Cannot create audio player: unsupported byte order %u",
+                        df_pcm->endianness);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
+
+            // we don't support container size != sample depth
+            if (df_pcm->containerSize != df_pcm->bitsPerSample) {
+                SL_LOGE("Cannot create audio player: unsupported container size %u bits for "
+                        "sample depth %u bits",
+                        df_pcm->containerSize, (SLuint32)df_pcm->bitsPerSample);
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+
             } //case SL_DATAFORMAT_PCM
             break;
         case SL_DATAFORMAT_MIME:

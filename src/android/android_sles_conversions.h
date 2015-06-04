@@ -27,6 +27,9 @@ static inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz)
 }
 
 static inline audio_format_t sles_to_android_sampleFormat(const SLDataFormat_PCM *df_pcm) {
+    if (df_pcm->containerSize != df_pcm->bitsPerSample) {
+        return AUDIO_FORMAT_INVALID;
+    }
     switch (df_pcm->formatType) {
     case SL_DATAFORMAT_PCM:
         switch (df_pcm->containerSize) {
