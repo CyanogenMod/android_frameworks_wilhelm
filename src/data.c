@@ -425,20 +425,20 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 // check the container bit depth
                 switch (pDataFormat->mPCM.containerSize) {
                 case 8:
-                    if (df_representation &&
+                    if (df_representation != NULL &&
                             *df_representation != SL_ANDROID_PCM_REPRESENTATION_UNSIGNED_INT) {
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
                 case 16:
                 case 24:
-                    if (df_representation &&
+                    if (df_representation != NULL &&
                             *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT) {
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
                 case 32:
-                    if (df_representation
+                    if (df_representation != NULL
                             && *df_representation != SL_ANDROID_PCM_REPRESENTATION_SIGNED_INT
                             && *df_representation != SL_ANDROID_PCM_REPRESENTATION_FLOAT) {
                         result = SL_RESULT_PARAMETER_INVALID;
