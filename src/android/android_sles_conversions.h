@@ -19,16 +19,6 @@
 #include <system/audio.h>
 
 //-----------------------------------------------------------------------------
-// Android to OpenSL ES
-//----------------------
-
-static inline SLuint32 android_to_sles_sampleRate(uint32_t srHz) {
-    // convert to milliHertz
-    return (SLuint32) srHz*1000;
-}
-
-
-//-----------------------------------------------------------------------------
 // OpenSL ES to Android
 //----------------------
 
