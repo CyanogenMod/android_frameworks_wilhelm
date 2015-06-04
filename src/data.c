@@ -17,6 +17,9 @@
 /** Data locator, data format, data source, and data sink support */
 
 #include "sles_allinclusive.h"
+#ifdef ANDROID  // FIXME This file should be portable
+#include "android/channels.h"
+#endif
 
 
 /** \brief Check a data locator and make local deep copy */
@@ -332,15 +335,6 @@ static void freeDataLocator(DataLocator *pDataLocator)
 
 
 /** \brief Check a data format and make local deep copy */
-#define SL_ANDROID_SPEAKER_QUAD (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT \
- | SL_SPEAKER_BACK_LEFT | SL_SPEAKER_BACK_RIGHT)
-
-#define SL_ANDROID_SPEAKER_5DOT1 (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT \
- | SL_SPEAKER_FRONT_CENTER  | SL_SPEAKER_LOW_FREQUENCY| SL_SPEAKER_BACK_LEFT \
- | SL_SPEAKER_BACK_RIGHT)
-
-#define SL_ANDROID_SPEAKER_7DOT1 (SL_ANDROID_SPEAKER_5DOT1 | SL_SPEAKER_SIDE_LEFT \
- |SL_SPEAKER_SIDE_RIGHT)
 
 static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDataFormat,
         SLuint32 allowedDataFormatMask)
@@ -375,6 +369,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             do {
 
                 // check the channel count
+                // FIXME Android and 8-channel positional assumptions here
                 switch (pDataFormat->mPCM.numChannels) {
                 case 1:     // mono
                 case 2:     // stereo
@@ -449,6 +444,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 }
 
                 // check the channel mask
+                // FIXME Android and 8-channel positional assumptions here
                 switch (pDataFormat->mPCM.channelMask) {
                 case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT:
                     if (2 != pDataFormat->mPCM.numChannels) {
@@ -462,6 +458,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
+#ifdef ANDROID
                 case SL_ANDROID_SPEAKER_QUAD:
                     if (4 != pDataFormat->mPCM.numChannels) {
                         result = SL_RESULT_PARAMETER_INVALID;
@@ -477,6 +474,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
+#endif
                 case 0:
                     // The default of front left rather than center for mono may be non-intuitive,
                     // but the left channel is the first channel for stereo or multichannel content.

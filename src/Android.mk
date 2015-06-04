@@ -97,6 +97,7 @@ LOCAL_SRC_FILES:=                     \
         android/android_StreamPlayer.cpp      \
         android/android_Effect.cpp            \
         android/util/AacAdtsExtractor.cpp     \
+        android/channels.c                    \
         autogen/IID_to_MPH.c                  \
         objects/C3DGroup.c                    \
         objects/CAudioPlayer.c                \

@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 #include "android/include/AacBqToPcmCbRenderer.h"
+#include "android/channels.h"
 #include <media/stagefright/foundation/ADebug.h>
 
 namespace android {

@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 #include "android/android_AudioSfDecoder.h"
+#include "android/channels.h"
 
 #include <binder/IServiceManager.h>
 #include <media/IMediaHTTPService.h>

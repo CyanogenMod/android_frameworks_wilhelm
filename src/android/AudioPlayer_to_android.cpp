@@ -20,6 +20,7 @@
 #include "android/android_StreamPlayer.h"
 #include "android/android_LocAVPlayer.h"
 #include "android/include/AacBqToPcmCbRenderer.h"
+#include "android/channels.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -165,8 +166,8 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, CAud
 
 
 //-----------------------------------------------------------------------------
-#define LEFT_CHANNEL_MASK  0x1 << 0
-#define RIGHT_CHANNEL_MASK 0x1 << 1
+#define LEFT_CHANNEL_MASK  AUDIO_CHANNEL_OUT_FRONT_LEFT
+#define RIGHT_CHANNEL_MASK AUDIO_CHANNEL_OUT_FRONT_RIGHT
 
 void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
 {
@@ -856,8 +857,11 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
 }
 
 // From EffectDownmix.h
+static
 const uint32_t kSides = AUDIO_CHANNEL_OUT_SIDE_LEFT | AUDIO_CHANNEL_OUT_SIDE_RIGHT;
+static
 const uint32_t kBacks = AUDIO_CHANNEL_OUT_BACK_LEFT | AUDIO_CHANNEL_OUT_BACK_RIGHT;
+static
 const uint32_t kUnsupported =
         AUDIO_CHANNEL_OUT_FRONT_LEFT_OF_CENTER | AUDIO_CHANNEL_OUT_FRONT_RIGHT_OF_CENTER |
         AUDIO_CHANNEL_OUT_TOP_CENTER |
@@ -869,9 +873,10 @@ const uint32_t kUnsupported =
         AUDIO_CHANNEL_OUT_TOP_BACK_RIGHT;
 
 //TODO(pmclean) This will need to be revisited when arbitrary N-channel support is added.
-SLresult android_audioPlayer_validateChannelMask(uint32_t mask, int numChans) {
+static
+SLresult android_audioPlayer_validateChannelMask(uint32_t mask, uint32_t numChans) {
     // Check that the number of channels falls within bounds.
-    if (numChans < 0 || numChans > 8) {
+    if (numChans == 0 || numChans > FCC_8) {
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
     // Are there the right number of channels in the mask?
@@ -1013,6 +1018,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                     (unsigned) df_pcm->containerSize);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
+
+            // FIXME confirm the following
             // df_pcm->channelMask: the earlier platform-independent check and the
             //     upcoming check by sles_to_android_channelMaskOut are sufficient
             switch (df_pcm->endianness) {
@@ -1514,7 +1521,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm),                // format
-                sles_to_android_channelMaskOut(df_pcm->numChannels, df_pcm->channelMask),
+                // FIXME ignores df_pcm->channelMask and assumes positional
+                audio_channel_out_mask_from_count(df_pcm->numChannels),
                                                                      // channel mask
                 0,                                                   // frameCount
                 policy,                                              // flags
