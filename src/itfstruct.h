@@ -639,7 +639,7 @@ typedef struct {
 typedef struct {
     const struct SLAndroidEffectItf_ *mItf;
     IObject *mThis;
-    android::KeyedVector<SLuint32, android::AudioEffect* > *mEffects;
+    android::KeyedVector<SLuint32, android::sp<android::AudioEffect> > *mEffects;
 } IAndroidEffect;
 
 typedef struct {
