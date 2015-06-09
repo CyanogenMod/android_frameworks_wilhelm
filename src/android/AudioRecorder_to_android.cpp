@@ -427,8 +427,9 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
             ar->mRecordSource,     // source
             sampleRate,            // sample rate in Hertz
             sles_to_android_sampleFormat(df_pcm),               // format
-            // FIXME ignores df_pcm->channelMask, assumes positional,
-            //       and only handles mono and stereo
+            // FIXME ignores df_pcm->channelMask,
+            //       and assumes positional mask for mono or stereo,
+            //       or indexed mask for > 2 channels
             audio_channel_in_mask_from_count(df_pcm->numChannels),
             android::String16(),   // app ops
             0,                     // frameCount
