@@ -401,7 +401,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
 
-                // check the container bit depth
+                // check the container bit depth and representation
                 switch (pDataFormat->mPCM.containerSize) {
                 case 8:
                     if (df_representation != NULL &&
@@ -432,8 +432,9 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
 
-                // container size cannot be less than sample size
-                if (pDataFormat->mPCM.containerSize < pDataFormat->mPCM.bitsPerSample) {
+                // sample size cannot be zero, and container size cannot be less than sample size
+                if (pDataFormat->mPCM.bitsPerSample == 0 ||
+                        pDataFormat->mPCM.containerSize < pDataFormat->mPCM.bitsPerSample) {
                     result = SL_RESULT_PARAMETER_INVALID;
                 }
                 if (SL_RESULT_SUCCESS != result) {
