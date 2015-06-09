@@ -528,8 +528,9 @@ SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboo
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    android::AudioEffect* pFx = outputMix->mAndroidEffect.mEffects->valueAt(index);
-    if (NULL == pFx) {
+    android::sp<android::AudioEffect> pFx =
+                          outputMix->mAndroidEffect.mEffects->valueAt(index);
+    if (pFx == 0) {
         return SL_RESULT_RESOURCE_ERROR;
     }
     if (android::NO_ERROR == android_fxSend_attach( ap, (bool) attach, pFx, sendLevel) ) {
@@ -766,7 +767,7 @@ SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid
     }
 
     // create new effect
-    android::AudioEffect* pFx = new android::AudioEffect(
+    android::sp<android::AudioEffect> pFx = new android::AudioEffect(
             NULL, // not using type to create effect
             android::String16(),
             (const effect_uuid_t*)pUuid,
@@ -780,7 +781,6 @@ SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid
     android::status_t status = pFx->initCheck();
     if (android::NO_ERROR != status) {
         SL_LOGE("AudioEffect initCheck() returned %d, effect will not be stored", status);
-        delete pFx;
         result = SL_RESULT_RESOURCE_ERROR;
     } else {
         SL_LOGV("AudioEffect successfully created on session %d", sessionId);
@@ -799,8 +799,6 @@ SLresult android_genericFx_releaseEffect(IAndroidEffect* iae, SLInterfaceID pUui
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
-        delete pFx;
         iae->mEffects->removeItem(index);
         return SL_RESULT_SUCCESS;
     }
@@ -815,7 +813,7 @@ SLresult android_genericFx_setEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, 
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
+        android::sp<android::AudioEffect> pFx = iae->mEffects->valueAt(index);
         android::status_t status = pFx->setEnabled(SL_BOOLEAN_TRUE == enabled);
         return android_fx_statusToResult(status);
     }
@@ -830,7 +828,7 @@ SLresult android_genericFx_isEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, S
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
+        android::sp<android::AudioEffect> pFx = iae->mEffects->valueAt(index);
         *pEnabled = (SLboolean) pFx->getEnabled();
         return SL_RESULT_SUCCESS;
     }
@@ -847,7 +845,7 @@ SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
+        android::sp<android::AudioEffect> pFx = iae->mEffects->valueAt(index);
         android::status_t status = pFx->command(
                 (uint32_t) command,
                 (uint32_t) commandSize,

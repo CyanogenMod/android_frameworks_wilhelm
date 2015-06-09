@@ -27,7 +27,8 @@
 
 #include <system/audio.h>
 
-template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
+template class android::KeyedVector<SLuint32,
+                                    android::sp<android::AudioEffect> > ;
 
 #define KEY_STREAM_TYPE_PARAMSIZE  sizeof(SLint32)
 
