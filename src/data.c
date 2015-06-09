@@ -369,7 +369,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             do {
 
                 // check the channel count
-                // FIXME Android and 8-channel positional assumptions here
+                // FIXME FCC_8 Android and 8-channel positional assumptions here
                 switch (pDataFormat->mPCM.numChannels) {
                 case 1:     // mono
                 case 2:     // stereo
@@ -444,7 +444,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 }
 
                 // check the channel mask
-                // FIXME Android and 8-channel positional assumptions here
+                // FIXME FCC_8 Android and 8-channel positional assumptions here
                 switch (pDataFormat->mPCM.channelMask) {
                 case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT:
                     if (2 != pDataFormat->mPCM.numChannels) {

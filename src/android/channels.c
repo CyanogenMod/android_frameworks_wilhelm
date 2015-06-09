@@ -35,6 +35,7 @@ SLuint32 channelCountToMask(unsigned channelCount)
         return SL_ANDROID_SPEAKER_5DOT1;
     case 8:
         return SL_ANDROID_SPEAKER_7DOT1;
+    // FIXME FCC_8
     default:
         return UNKNOWN_CHANNELMASK;
     }
