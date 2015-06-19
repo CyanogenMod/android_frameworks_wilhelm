@@ -7,13 +7,18 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	$(call include-path-for, wilhelm)
+	$(call include-path-for, wilhelm) \
+	$(call include-path-for, audio-utils)
 
 LOCAL_SRC_FILES:= \
 	slesTestRecBuffQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
+	libaudioutils \
 	libOpenSLES
+
+LOCAL_STATIC_LIBRARIES := \
+	libsndfile
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
