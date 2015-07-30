@@ -373,8 +373,11 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 switch (pDataFormat->mPCM.numChannels) {
                 case 1:     // mono
                 case 2:     // stereo
+                case 3:     // stereo + front center
                 case 4:     // QUAD
+                case 5:     // QUAD + front center
                 case 6:     // 5.1
+                case 7:     // 5.1 + back center
                 case 8:     // 7.1
                     break;
                 case 0:     // unknown
@@ -460,13 +463,28 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     }
                     break;
 #ifdef ANDROID
+                case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT | SL_SPEAKER_FRONT_CENTER:
+                    if (3 != pDataFormat->mPCM.numChannels) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
                 case SL_ANDROID_SPEAKER_QUAD:
                     if (4 != pDataFormat->mPCM.numChannels) {
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
+                case SL_ANDROID_SPEAKER_QUAD | SL_SPEAKER_FRONT_CENTER:
+                    if (5 != pDataFormat->mPCM.numChannels) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
                 case SL_ANDROID_SPEAKER_5DOT1:
                     if (6 != pDataFormat->mPCM.numChannels) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    }
+                    break;
+                case SL_ANDROID_SPEAKER_5DOT1 | SL_SPEAKER_BACK_CENTER:
+                    if (7 != pDataFormat->mPCM.numChannels) {
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
@@ -476,12 +494,22 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     }
                     break;
 #endif
-                case 0:
+                case 0: {
+                    // According to OpenSL ES 1.0.1 section 9.1.7 SLDataFormat_PCM, "a default
+                    // setting of zero indicates stereo format (i.e. the setting is equivalent to
+                    // SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT)."
+                    //
+                    // ANDROID SPECIFIC BEHAVIOR.
+                    // We fill in the appropriate mask to the number indicated by numChannels.
                     // The default of front left rather than center for mono may be non-intuitive,
                     // but the left channel is the first channel for stereo or multichannel content.
-                    pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?
-                        SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_LEFT;
-                    break;
+                    SLuint32 mask = channelCountToMask(pDataFormat->mPCM.numChannels);
+                    if (mask == UNKNOWN_CHANNELMASK) {
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    } else {
+                        pDataFormat->mPCM.channelMask = mask;
+                    }
+                } break;
                 default:
                     result = SL_RESULT_PARAMETER_INVALID;
                     break;

@@ -29,10 +29,16 @@ SLuint32 channelCountToMask(unsigned channelCount)
     case 2:
         return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     // Android-specific
+    case 3:
+        return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT | SL_SPEAKER_FRONT_CENTER;
     case 4:
         return SL_ANDROID_SPEAKER_QUAD;
+    case 5:
+        return SL_ANDROID_SPEAKER_QUAD | SL_SPEAKER_FRONT_CENTER;
     case 6:
         return SL_ANDROID_SPEAKER_5DOT1;
+    case 7:
+        return SL_ANDROID_SPEAKER_5DOT1 | SL_SPEAKER_BACK_CENTER;
     case 8:
         return SL_ANDROID_SPEAKER_7DOT1;
     // FIXME FCC_8
