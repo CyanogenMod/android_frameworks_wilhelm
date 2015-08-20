@@ -1464,7 +1464,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         audio_output_flags_t policy;
         if (canUseFastTrack(pAudioPlayer)) {
-            policy = AUDIO_OUTPUT_FLAG_FAST;
+            policy = (audio_output_flags_t)(AUDIO_OUTPUT_FLAG_FAST | AUDIO_OUTPUT_FLAG_RAW);
         } else {
             policy = AUDIO_OUTPUT_FLAG_NONE;
         }
