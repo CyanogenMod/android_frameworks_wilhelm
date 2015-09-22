@@ -151,7 +151,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
     // only decoding a single track of data
     const size_t kTrackToDecode = 0;
 
-    sp<MediaSource> source = extractor->getTrack(kTrackToDecode);
+    sp<IMediaSource> source = extractor->getTrack(kTrackToDecode);
     if (source == 0) {
         SL_LOGE("AacBqToPcmCbRenderer::onPrepare: error getting source from extractor");
         notifyPrepared(ERROR_UNSUPPORTED);

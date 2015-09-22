@@ -227,7 +227,7 @@ void AudioSfDecoder::onPrepare() {
 
     //---------------------------------
     // Instantiate and initialize the decoder attached to the data source
-    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+    sp<IMediaExtractor> extractor = MediaExtractor::Create(dataSource);
     if (extractor == NULL) {
         SL_LOGE("AudioSfDecoder::onPrepare: Could not instantiate extractor.");
         notifyPrepared(ERROR_UNSUPPORTED);
@@ -260,7 +260,7 @@ void AudioSfDecoder::onPrepare() {
         return;
     }
 
-    sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
+    sp<IMediaSource> source = extractor->getTrack(audioTrackIndex);
     sp<MetaData> meta = source->getFormat();
 
     // we can't trust the OMXCodec (if there is one) to issue a INFO_FORMAT_CHANGED so we want

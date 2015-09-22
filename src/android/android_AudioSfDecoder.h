@@ -100,7 +100,7 @@ protected:
     virtual void pauseAudioSink() = 0;
 
     sp<DataSource>  mDataSource; // where the raw data comes from
-    sp<MediaSource> mAudioSource;// the decoder reading from the data source
+    sp<IMediaSource> mAudioSource;// the decoder reading from the data source
     // used to indicate mAudioSource was successfully started, but wasn't stopped
     bool            mAudioSourceStarted;
 
