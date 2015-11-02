@@ -185,13 +185,19 @@ LOCAL_SHARED_LIBRARIES :=         \
         libbinder                 \
         libstagefright            \
         libstagefright_foundation \
-        libstagefright_http_support \
         libcutils                 \
         libgui                    \
         libdl                     \
         libeffects
 
-
+# For Brillo, we do not want this dependency as it significantly increases the
+# size of the checkout. Also, the library is dependent on Java (which is not
+# present in Brillo), so it doesn't really make sense to have it anyways. See
+# b/24507845 for more details.
+ifndef BRILLO
+LOCAL_SHARED_LIBRARIES += \
+        libstagefright_http_support
+endif
 
 LOCAL_MODULE := libwilhelm
 LOCAL_MODULE_TAGS := optional
