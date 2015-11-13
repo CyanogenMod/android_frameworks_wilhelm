@@ -54,6 +54,22 @@ typedef struct SLAndroidDataFormat_PCM_EX_ {
     SLuint32         representation;
 } SLAndroidDataFormat_PCM_EX;
 
+#define SL_ANDROID_SPEAKER_NON_POSITIONAL       ((SLuint32) 0x80000000)
+
+// Make an indexed channel mask from a bitfield.
+//
+// Each bit in the bitfield corresponds to a channel index,
+// from least-significant bit (channel 0) up to the bit
+// corresponding to the maximum channel count (currently FCC_8).
+// A '1' in the bitfield indicates that the channel should be
+// included in the stream, while a '0' indicates that it
+// should be excluded. For instance, a bitfield of 0x0A (binary 00001010)
+// would define a stream that contains channels 1 and 3. (The corresponding
+// indexed mask, after setting the SL_ANDROID_NON_POSITIONAL bit,
+// would be 0x8000000A.)
+#define SL_ANDROID_MAKE_INDEXED_CHANNEL_MASK(bitfield) \
+        ((bitfield) | SL_ANDROID_SPEAKER_NON_POSITIONAL)
+
 /*---------------------------------------------------------------------------*/
 /* Android Effect interface                                                  */
 /*---------------------------------------------------------------------------*/

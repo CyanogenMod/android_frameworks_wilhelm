@@ -143,7 +143,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
         //      once the decoder has figured them out
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = UNKNOWN_NUMCHANNELS;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = UNKNOWN_SAMPLERATE;
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = UNKNOWN_CHANNELMASK;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = SL_ANDROID_UNKNOWN_CHANNELMASK;
     }
 
     sp<MediaExtractor> extractor = new AacAdtsExtractor(mBqSource);
@@ -201,7 +201,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = sr;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = channelCount;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] =
-                channelCountToMask(channelCount);
+                sles_channel_out_mask_from_count(channelCount);
     }
     SL_LOGV("AacBqToPcmCbRenderer::onPrepare() channel count=%d SR=%d",
             channelCount, sr);

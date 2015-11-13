@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-
 #include "sles_allinclusive.h"
 #include "android_prompts.h"
+#include "channels.h"
 
 #include <utils/String16.h>
 
 #include <system/audio.h>
+#include <SLES/OpenSLES_Android.h>
 
 #define KEY_RECORDING_SOURCE_PARAMSIZE  sizeof(SLuint32)
 #define KEY_RECORDING_PRESET_PARAMSIZE  sizeof(SLuint32)
@@ -178,10 +179,7 @@ SLresult android_audioRecorder_checkSourceSink(CAudioRecorder* ar) {
         } // SL_ANDROID_DATAFORMAT_PCM_EX - fall through to next test.
         case SL_DATAFORMAT_PCM: {
             const SLDataFormat_PCM *df_pcm = (const SLDataFormat_PCM *) pAudioSnk->pFormat;
-            // FIXME validate channel mask and number of channels
-
-            // checkDataFormat already checked sample rate
-
+            // checkDataFormat already checked sample rate, channels, and mask
             ar->mNumChannels = df_pcm->numChannels;
 
             if (df_pcm->endianness != ar->mObject.mEngine->mEngine.mNativeEndianness) {
@@ -437,15 +435,24 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     // currently nothing analogous to canUseFastTrack() for recording
     audio_input_flags_t policy = AUDIO_INPUT_FLAG_FAST;
 
+    const SLDataSource *pAudioSrc = &ar->mDataSource.u.mSource;
+    const SLuint32 sourceFormatType = *(SLuint32 *)pAudioSrc->pFormat;
+
+    SL_LOGV("Audio Record format: %dch(0x%x), %dbit, %dKHz",
+            df_pcm->numChannels,
+            df_pcm->channelMask,
+            df_pcm->bitsPerSample,
+            df_pcm->samplesPerSec / 1000000);
+    // note that df_pcm->channelMask has already been validated during object creation.
+    audio_channel_mask_t channelMask = sles_to_audio_input_channel_mask(df_pcm->channelMask);
+    SL_LOGV("SLES channel mask 0x%x converted to Android mask 0x%x", df_pcm->channelMask, channelMask);
+
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord(
             ar->mRecordSource,     // source
             sampleRate,            // sample rate in Hertz
             sles_to_android_sampleFormat(df_pcm),               // format
-            // FIXME ignores df_pcm->channelMask,
-            //       and assumes positional mask for mono or stereo,
-            //       or indexed mask for > 2 channels
-            audio_channel_in_mask_from_count(df_pcm->numChannels),
+            channelMask,           // channel mask
             android::String16(),   // app ops
             0,                     // frameCount
             audioRecorder_callback,// callback_t
