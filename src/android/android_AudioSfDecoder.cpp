@@ -22,8 +22,8 @@
 
 #include <binder/IServiceManager.h>
 #include <media/IMediaHTTPService.h>
+#include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/foundation/ADebug.h>
-
 
 #define SIZE_CACHED_HIGH_BYTES 1000000
 #define SIZE_CACHED_MED_BYTES   700000
