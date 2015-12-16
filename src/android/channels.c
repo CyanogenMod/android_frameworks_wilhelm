@@ -15,6 +15,7 @@
  */
 
 #include <SLES/OpenSLES.h>
+#include <system/audio.h>
 #include "channels.h"
 
 // Return an OpenSL ES channel mask, as used in SLDataFormat_PCM.channelMask
@@ -22,6 +23,9 @@ SLuint32 channelCountToMask(unsigned channelCount)
 {
     // FIXME channel mask is not yet implemented by Stagefright, so use a reasonable default
     //       that is computed from the channel count
+    if (channelCount > FCC_8) {
+        return UNKNOWN_CHANNELMASK;
+    }
     switch (channelCount) {
     case 1:
         // see explanation in data.c re: default channel mask for mono
@@ -41,7 +45,6 @@ SLuint32 channelCountToMask(unsigned channelCount)
         return SL_ANDROID_SPEAKER_5DOT1 | SL_SPEAKER_BACK_CENTER;
     case 8:
         return SL_ANDROID_SPEAKER_7DOT1;
-    // FIXME FCC_8
     default:
         return UNKNOWN_CHANNELMASK;
     }

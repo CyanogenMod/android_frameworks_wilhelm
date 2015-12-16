@@ -369,23 +369,11 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             do {
 
                 // check the channel count
-                // FIXME FCC_8 Android and 8-channel positional assumptions here
-                switch (pDataFormat->mPCM.numChannels) {
-                case 1:     // mono
-                case 2:     // stereo
-                case 3:     // stereo + front center
-                case 4:     // QUAD
-                case 5:     // QUAD + front center
-                case 6:     // 5.1
-                case 7:     // 5.1 + back center
-                case 8:     // 7.1
-                    break;
-                case 0:     // unknown
+                // FIXME positional assumption here
+                if (pDataFormat->mPCM.numChannels < 1) {
                     result = SL_RESULT_PARAMETER_INVALID;
-                    break;
-                default:    // multi-channel
+                } else if (pDataFormat->mPCM.numChannels > FCC_8) {
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
-                    break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
                     SL_LOGE("%s: numChannels=%u", name, (unsigned) pDataFormat->mPCM.numChannels);
@@ -448,7 +436,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                 }
 
                 // check the channel mask
-                // FIXME FCC_8 Android and 8-channel positional assumptions here
+                // FIXME positional assumptions here
                 switch (pDataFormat->mPCM.channelMask) {
                 case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT:
                     if (2 != pDataFormat->mPCM.numChannels) {

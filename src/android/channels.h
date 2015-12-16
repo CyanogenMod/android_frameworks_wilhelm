@@ -31,9 +31,6 @@
 
 extern SLuint32 channelCountToMask(unsigned channelCount);
 
-// FIXME merge all definitions
-#define FCC_8 8
-
 #define UNKNOWN_CHANNELMASK 0
 
 #endif // ANDROID_CHANNELS_H_
