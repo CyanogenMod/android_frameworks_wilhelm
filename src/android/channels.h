@@ -24,7 +24,7 @@
 #define SL_ANDROID_INDEXED_SPEAKER_MASK_ALL     ((SLuint32) \
                                                 ((1 << SL_ANDROID_SPEAKER_COUNT_MAX) - 1))
 #define SL_ANDROID_POSITIONAL_SPEAKER_MASK_ALL  \
-        SL_SPEAKER_FRONT_LEFT \
+        ( SL_SPEAKER_FRONT_LEFT \
         | SL_SPEAKER_FRONT_RIGHT \
         | SL_SPEAKER_FRONT_CENTER \
         | SL_SPEAKER_LOW_FREQUENCY \
@@ -41,7 +41,7 @@
         | SL_SPEAKER_TOP_FRONT_RIGHT \
         | SL_SPEAKER_TOP_BACK_LEFT \
         | SL_SPEAKER_TOP_BACK_CENTER \
-        | SL_SPEAKER_TOP_BACK_RIGHT
+        | SL_SPEAKER_TOP_BACK_RIGHT )
 
 // Channel count and channel mask definitions
 
