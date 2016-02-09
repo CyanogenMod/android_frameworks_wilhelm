@@ -23,6 +23,7 @@
 #include <binder/IServiceManager.h>
 #include <media/IMediaHTTPService.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/SimpleDecodingSource.h>
 
 
 #define SIZE_CACHED_HIGH_BYTES 1000000
@@ -297,13 +298,7 @@ void AudioSfDecoder::onPrepare() {
 
     // the audio content is not raw PCM, so we need a decoder
     if (!isRawAudio) {
-        OMXClient client;
-        CHECK_EQ(client.connect(), (status_t)OK);
-
-        source = OMXCodec::Create(
-                client.interface(), meta, false /* createEncoder */,
-                source);
-
+        source = SimpleDecodingSource::Create(source);
         if (source == NULL) {
             SL_LOGE("AudioSfDecoder::onPrepare: Could not instantiate decoder.");
             notifyPrepared(ERROR_UNSUPPORTED);
