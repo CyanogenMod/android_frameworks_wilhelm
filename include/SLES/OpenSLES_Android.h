@@ -70,6 +70,12 @@ typedef struct SLAndroidDataFormat_PCM_EX_ {
 #define SL_ANDROID_MAKE_INDEXED_CHANNEL_MASK(bitfield) \
         ((bitfield) | SL_ANDROID_SPEAKER_NON_POSITIONAL)
 
+// Specifying SL_ANDROID_SPEAKER_USE_DEFAULT as a channel mask in
+// SLAndroidDataFormat_PCM_EX causes OpenSL ES to assign a default
+// channel mask based on the number of channels requested. This
+// value cannot be combined with SL_ANDROID_SPEAKER_NON_POSITIONAL.
+#define SL_ANDROID_SPEAKER_USE_DEFAULT ((SLuint32)0)
+
 /*---------------------------------------------------------------------------*/
 /* Android Effect interface                                                  */
 /*---------------------------------------------------------------------------*/
