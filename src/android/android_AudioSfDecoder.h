@@ -23,8 +23,6 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
-#include <media/stagefright/OMXClient.h>
-#include <media/stagefright/OMXCodec.h>
 #include "NuCachedSource2.h"
 #include "ThrottledSource.h"
 
