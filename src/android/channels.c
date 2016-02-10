@@ -191,6 +191,10 @@ static audio_channel_mask_t sles_to_android_mask_helper(
         SL_LOGE("Unrecognized channel representation %#x", rep);
     }
 
+    uint32_t result = audio_channel_mask_from_representation_and_bits(
+            rep,
+            bitsOut);
+
     if (popcount(bitsIn) != popcount(bitsOut)) {
         // At this point mask has already been stripped of the
         // representation bitsOut, so its bitcount should equal the number
@@ -199,14 +203,14 @@ static audio_channel_mask_t sles_to_android_mask_helper(
         // channels that the app requested. That will cause an
         // error downstream if the app doesn't correct it, so
         // issue a warning here.
-        SL_LOGW("Conversion from OpenSL ES channel mask %#x %s channels",
+        SL_LOGW("Conversion from OpenSL ES %s channel mask %#x to Android mask %#x %s channels",
+                (rep == AUDIO_CHANNEL_REPRESENTATION_POSITION) ? "positional" : "indexed",
                 mask,
-                (popcount(bitsIn) > popcount(bitsOut)) ? "gains" : "loses");
+                result,
+                (popcount(bitsIn) < popcount(bitsOut)) ? "gains" : "loses");
     }
 
-    return audio_channel_mask_from_representation_and_bits(
-            rep,
-            bitsOut);
+    return result;
 }
 
 /*

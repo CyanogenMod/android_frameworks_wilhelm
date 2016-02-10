@@ -443,8 +443,17 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
             df_pcm->channelMask,
             df_pcm->bitsPerSample,
             df_pcm->samplesPerSec / 1000000);
+
     // note that df_pcm->channelMask has already been validated during object creation.
     audio_channel_mask_t channelMask = sles_to_audio_input_channel_mask(df_pcm->channelMask);
+
+    // To maintain backward compatibility with previous releases, ignore input
+    // channel masks that are not indexed. We do not define valid positional bits
+    // for OpenSL ES input formats.
+    if (audio_channel_mask_get_representation(channelMask)
+            == AUDIO_CHANNEL_REPRESENTATION_POSITION) {
+        channelMask = audio_channel_in_mask_from_count(df_pcm->numChannels);
+    }
     SL_LOGV("SLES channel mask 0x%x converted to Android mask 0x%x", df_pcm->channelMask, channelMask);
 
     // initialize platform-specific CAudioRecorder fields
