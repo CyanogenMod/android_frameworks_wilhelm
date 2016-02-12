@@ -1477,8 +1477,17 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         audio_channel_mask_t channelMask;
         channelMask = sles_to_audio_output_channel_mask(df_pcm->channelMask);
-        if (channelMask == SL_ANDROID_UNKNOWN_CHANNELMASK) {
+
+        // To maintain backward compatibility with previous releases, ignore
+        // channel masks that are not indexed.
+        if (channelMask == AUDIO_CHANNEL_INVALID
+                || audio_channel_mask_get_representation(channelMask)
+                        == AUDIO_CHANNEL_REPRESENTATION_POSITION) {
             channelMask = audio_channel_out_mask_from_count(df_pcm->numChannels);
+            SL_LOGI("Emulating old channel mask behavior "
+                    "(ignoring positional mask %#x, using default mask %#x based on "
+                    "channel count of %d)", df_pcm->channelMask, channelMask,
+                    df_pcm->numChannels);
         }
         SL_LOGV("AudioPlayer: mapped SLES channel mask %#x to android channel mask %#x",
             df_pcm->channelMask,
