@@ -69,7 +69,7 @@ bool android_videoCodec_expose() {
     NbSupportedDecoderTypes = 0;
     for (size_t m = 0 ; m < kNbVideoMimeTypes ; m++) {
         VideoDecoderNbProfLevel[m] = 0;
-        for (ssize_t index = 0;;) {
+        for (ssize_t index = 0;; ++index) {
             index = list->findCodecByType(
                     kVideoMimeTypes[m], false /* encoder */, index);
             if (index < 0) {
