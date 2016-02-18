@@ -21,7 +21,7 @@ include $(CLEAR_VARS)
 LOCAL_C_INCLUDES:= \
         $(call include-path-for, wilhelm)
 
-LOCAL_CFLAGS += -Wno-override-init
+LOCAL_CFLAGS += -Wno-initializer-overrides
 # -Wno-missing-field-initializers
 # optional, see comments in MPH_to.c: -DUSE_DESIGNATED_INITIALIZERS -S
 # and also see ../tools/mphgen/Makefile
