@@ -184,9 +184,9 @@ enum CacheStatus_t {
 };
 
 enum {
-    kDataLocatorNone = 'none',
-    kDataLocatorUri  = 'uri',
-    kDataLocatorFd   = 'fd',
+    kDataLocatorNone = 0,
+    kDataLocatorUri  = 1,
+    kDataLocatorFd   = 2,
 };
 
 struct FdInfo {

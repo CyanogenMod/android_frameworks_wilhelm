@@ -172,7 +172,7 @@ LOCAL_C_INCLUDES:=                                                  \
 
 LOCAL_CFLAGS += -x c++ -std=gnu++11 -Wno-multichar -Wno-invalid-offsetof
 
-LOCAL_CFLAGS += -Wno-unused-parameter
+LOCAL_CFLAGS += -Wno-unused-parameter -Werror
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper        \

@@ -6,7 +6,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE    := libnative-media-jni
 LOCAL_SRC_FILES := native-media-jni.c
 LOCAL_CFLAGS += -I$(call include-path-for, wilhelm)
-LOCAL_CFLAGS += -UNDEBUG
+LOCAL_CFLAGS += -UNDEBUG -Wno-unused-parameter
 
 LOCAL_SHARED_LIBRARIES += libutils liblog libOpenMAXAL libandroid
 
