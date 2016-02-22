@@ -423,7 +423,6 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     // already checked in created and checkSourceSink
     assert(ar->mDataSink.mLocator.mLocatorType == SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE);
 
-    const SLDataLocator_BufferQueue *dl_bq = &ar->mDataSink.mLocator.mBufferQueue;
     const SLDataFormat_PCM *df_pcm = &ar->mDataSink.mFormat.mPCM;
 
     //  the following platform-independent fields have been initialized in CreateAudioRecorder()
@@ -434,9 +433,6 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
     // currently nothing analogous to canUseFastTrack() for recording
     audio_input_flags_t policy = AUDIO_INPUT_FLAG_FAST;
-
-    const SLDataSource *pAudioSrc = &ar->mDataSource.u.mSource;
-    const SLuint32 sourceFormatType = *(SLuint32 *)pAudioSrc->pFormat;
 
     SL_LOGV("Audio Record format: %dch(0x%x), %dbit, %dKHz",
             df_pcm->numChannels,

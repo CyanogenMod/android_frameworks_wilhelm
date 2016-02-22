@@ -368,9 +368,9 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     // FIXME verify data source
     const SLDataSource *pDataSrc = &mp->mDataSource.u.mSource;
     // FIXME verify audio data sink
-    const SLDataSink *pAudioSnk = &mp->mAudioSink.u.mSink;
+    // const SLDataSink *pAudioSnk = &mp->mAudioSink.u.mSink;
     // FIXME verify image data sink
-    const SLDataSink *pVideoSnk = &mp->mImageVideoSink.u.mSink;
+    // const SLDataSink *pVideoSnk = &mp->mImageVideoSink.u.mSink;
 
     XAuint32 sourceLocator = *(XAuint32 *)pDataSrc->pLocator;
     switch (sourceLocator) {
@@ -409,9 +409,6 @@ XAresult android_Player_create(CMediaPlayer *mp) {
 XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     SL_LOGV("android_Player_realize_l(%p)", mp);
     XAresult result = XA_RESULT_SUCCESS;
-
-    const SLDataSource *pDataSrc = &mp->mDataSource.u.mSource;
-    const SLuint32 sourceLocator = *(SLuint32 *)pDataSrc->pLocator;
 
     AudioPlayback_Parameters ap_params;
     ap_params.sessionId = mp->mSessionId;

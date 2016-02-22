@@ -943,7 +943,6 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     const SLuint32 sourceLocatorType = *(SLuint32 *)pAudioSrc->pLocator;
     const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
     const SLuint32 sourceFormatType = *(SLuint32 *)pAudioSrc->pFormat;
-    const SLuint32 sinkFormatType = *(SLuint32 *)pAudioSnk->pFormat;
 
     const SLuint32 *df_representation = NULL; // pointer to representation field, if it exists
 
@@ -953,8 +952,6 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     case SL_DATALOCATOR_BUFFERQUEUE:
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
         {
-        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
-
         // Buffer format
         switch (sourceFormatType) {
         //     currently only PCM buffer queues are supported,
@@ -1465,15 +1462,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE: {
         // initialize platform-specific CAudioPlayer fields
 
-        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *)
-                pAudioPlayer->mDynamicSource.mDataSource;
         SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *)
                 pAudioPlayer->mDynamicSource.mDataSource->pFormat;
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
-
-        const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
-        const SLuint32 sourceFormatType = *(SLuint32 *)pAudioSrc->pFormat;
 
         audio_channel_mask_t channelMask;
         channelMask = sles_to_audio_output_channel_mask(df_pcm->channelMask);
@@ -1990,7 +1982,6 @@ SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *ap,
 void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
 
     SLuint32 playState = ap->mPlay.mState;
-    AndroidObjectState objState = ap->mAndroidObjState;
 
     switch (ap->mAndroidObjType) {
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:

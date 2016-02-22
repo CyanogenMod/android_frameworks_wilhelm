@@ -476,7 +476,7 @@ ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
 
-LOCAL_CFLAGS += -UNDEBUG
+LOCAL_CFLAGS += -UNDEBUG -Wall -Wextra -Werror
 
 LOCAL_MODULE:= xaplay
 
