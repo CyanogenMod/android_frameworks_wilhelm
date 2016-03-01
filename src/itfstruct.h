@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Configuration.h"
 #ifdef ANDROID
 #include "media/AudioEffect.h"
 #include "hardware/audio_effect.h"
