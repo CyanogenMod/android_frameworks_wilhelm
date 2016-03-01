@@ -45,9 +45,7 @@ LOCAL_CFLAGS += -DUSE_PROFILES=0
 LOCAL_CFLAGS += -DUSE_TRACE
 # or -UUSE_TRACE to disable API logging
 
-# enable mutex deadlock detection
-LOCAL_CFLAGS += -DUSE_DEBUG
-# or -UUSE_DEBUG for no mutex deadlock detection
+# see Configuration.h for USE_DEBUG
 
 # enable assert() to do runtime checking
 LOCAL_CFLAGS += -UNDEBUG

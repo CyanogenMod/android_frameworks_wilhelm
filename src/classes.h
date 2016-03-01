@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Configuration.h"
 #ifdef ANDROID
 #include "android/CallbackProtector.h"
 #include "android/android_Effect.h"
