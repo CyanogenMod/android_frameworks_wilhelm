@@ -19,6 +19,7 @@
 
 #include "OpenSLES_AndroidConfiguration.h"
 #include "OpenSLES_AndroidMetadata.h"
+#include <jni.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -205,6 +206,10 @@ struct SLAndroidConfigurationItf_ {
            SLuint32 *pValueSize,
            void *pConfigValue
        );
+
+    SLresult (*AcquireJavaAudioRouting) (SLAndroidConfigurationItf self,
+            JNIEnv* j_env,
+            jobject *pObject);
 };
 
 

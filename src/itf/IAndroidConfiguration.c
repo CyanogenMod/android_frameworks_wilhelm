@@ -17,7 +17,7 @@
 /* AndroidConfiguration implementation */
 
 #include "sles_allinclusive.h"
-
+#include <SLES/OpenSLES_Android.h>
 
 static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf self,
         const SLchar *configKey,
@@ -95,10 +95,122 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
     SL_LEAVE_INTERFACE
 }
 
+/*
+ * Native Routing API
+ */
+
+/*
+ * Acquires a Java AudioRouting object (interface implementation) which can be used to control
+ * the routing of the associated native player or recorder. Note that the Java Routing object
+ * can not be acquired until the AudioTrack  or AudioRecorder associated with the
+ * SLAndroidConfigurationItf has been realized (i.e. SLPlayItf::realize() or
+ * SLRecordItf::realize() has been called).
+ * Parameters:
+ *   self   An SLAndroidConfigurationItf obtained from either an OpenSL ES AudioPlayer
+ *          or AudioRecorder.
+ *   j_env  The Java Environment pointer (passed in to the calling JNI function).
+ *   pObject    Points to the jobject to receive the acquired AudioRouting interface
+ *          implementation.
+ * Returns SL_RESULT_SUCCESS is the AudioRouting is acquired, SL_RESULT_PARAMETER_INVALID if
+ *   there is a problem with the arguments causing the function to fail,
+ *   SL_RESULT_PRECONDITIONS_VIOLATED it the AudioPlayer or AudioRecorder object associated
+ *   with the ConfigurationItf has not been realized.
+ */
+static SLresult IAndroidConfiguration_AcquireJavaAudioRouting(SLAndroidConfigurationItf self,
+        JNIEnv *j_env, jobject *pObject)
+{
+    SL_ENTER_INTERFACE
+
+    if (j_env == NULL || self == NULL || pObject == NULL) {
+        result =  SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IObject *thisObject = InterfaceToIObject((IAndroidConfiguration *) self);
+
+        switch (IObjectToObjectID(thisObject)) {
+        case SL_OBJECTID_AUDIOPLAYER:
+        {
+            // Get the constructor for (Java) AudioTrackRoutingProxy
+            jclass clsAudioTrackRoutingProxy =
+                    j_env->FindClass("android/media/AudioTrackRoutingProxy");
+            jmethodID midAudioTrackRoutingProxy_ctor =
+                j_env->GetMethodID(clsAudioTrackRoutingProxy, "<init>", "(J)V");
+
+            IAndroidConfiguration* configItf = (IAndroidConfiguration*)self; // Get internal struct
+            IObject* configObj = configItf->mThis;              // get corresponding object
+            CAudioPlayer* player = (CAudioPlayer*)configObj;    // get the native player
+
+            // Make sure the player has been realized.
+            if (player->mObject.mState != SL_OBJECT_STATE_REALIZED) {
+                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                SL_LOGE("Error creating routing object - Player not realized.");
+            } else {
+                android::AudioTrack* pAudioTrack = player->mAudioTrack.get();
+                if (pAudioTrack == NULL) {
+                    result = SL_RESULT_INTERNAL_ERROR;
+                } else {
+                    *pObject = j_env->NewObject(clsAudioTrackRoutingProxy,
+                                                midAudioTrackRoutingProxy_ctor,
+                                                (uintptr_t)pAudioTrack /*audioTrackObjInLong*/);
+                    if (j_env->ExceptionCheck()) {
+                        SL_LOGE("Java exception creating player routing object.");
+                        result = SL_RESULT_INTERNAL_ERROR;
+                    } else {
+                        result = SL_RESULT_SUCCESS;
+                    }
+                }
+            }
+        }
+            break;
+
+        case SL_OBJECTID_AUDIORECORDER:
+        {
+            // Get the constructor for (Java) AudioRecordRoutingProxy
+            jclass clsAudioRecordRoutingProxy =
+                    j_env->FindClass("android/media/AudioRecordRoutingProxy");
+            jmethodID midAudioRecordRoutingProxy_ctor =
+                j_env->GetMethodID(clsAudioRecordRoutingProxy, "<init>", "(J)V");
+
+            IAndroidConfiguration* configItf = (IAndroidConfiguration*)self; // Get internal struct
+            IObject* configObj = configItf->mThis;                  // get corresponding object
+            CAudioRecorder* recorder = (CAudioRecorder*)configObj;  // get the native recorder
+
+            // Make sure the recorder has been realized.
+            if (recorder->mObject.mState != SL_OBJECT_STATE_REALIZED) {
+                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                SL_LOGE("Error creating routing object - Recorder not realized.");
+            } else {
+                android::AudioRecord* pAudioRecord = recorder->mAudioRecord.get();
+                if (pAudioRecord == NULL) {
+                    result = SL_RESULT_INTERNAL_ERROR;
+                } else {
+                    *pObject =
+                            j_env->NewObject(clsAudioRecordRoutingProxy,
+                                             midAudioRecordRoutingProxy_ctor,
+                                             (uintptr_t)pAudioRecord /*audioRecordObjInLong*/);
+                    if (j_env->ExceptionCheck()) {
+                        SL_LOGE("Java exception creating recorder routing object.");
+                        result = SL_RESULT_INTERNAL_ERROR;
+                    } else {
+                        result = SL_RESULT_SUCCESS;
+                    }
+                }
+            }
+        }
+            break;
+
+        default:
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
+    }
+
+    SL_LEAVE_INTERFACE
+}
 
 static const struct SLAndroidConfigurationItf_ IAndroidConfiguration_Itf = {
     IAndroidConfiguration_SetConfiguration,
-    IAndroidConfiguration_GetConfiguration
+    IAndroidConfiguration_GetConfiguration,
+    IAndroidConfiguration_AcquireJavaAudioRouting
 };
 
 void IAndroidConfiguration_init(void *self)
