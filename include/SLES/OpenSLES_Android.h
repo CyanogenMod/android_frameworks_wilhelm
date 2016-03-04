@@ -194,6 +194,11 @@ extern SL_API const SLInterfaceID SL_IID_ANDROIDCONFIGURATION;
 struct SLAndroidConfigurationItf_;
 typedef const struct SLAndroidConfigurationItf_ * const * SLAndroidConfigurationItf;
 
+/*
+ * Java Proxy Type IDs
+ */
+#define SL_ANDROID_JAVA_PROXY_ROUTING   0x0001
+
 struct SLAndroidConfigurationItf_ {
 
     SLresult (*SetConfiguration) (SLAndroidConfigurationItf self,
@@ -207,9 +212,12 @@ struct SLAndroidConfigurationItf_ {
            void *pConfigValue
        );
 
-    SLresult (*AcquireJavaAudioRouting) (SLAndroidConfigurationItf self,
-            JNIEnv* j_env,
-            jobject *pObject);
+    SLresult (*AcquireJavaProxy) (SLAndroidConfigurationItf self,
+            SLuint32 proxyType,
+            jobject *pProxyObj);
+
+    SLresult (*ReleaseJavaProxy) (SLAndroidConfigurationItf self,
+            SLuint32 proxyType);
 };
 
 
