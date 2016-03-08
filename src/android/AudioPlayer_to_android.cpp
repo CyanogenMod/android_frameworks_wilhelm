@@ -1280,7 +1280,8 @@ void android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
     // FIXME Consolidate initializations (many of these already in IEngine_CreateAudioPlayer)
     // mAndroidObjType: see above comment
     pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-    pAudioPlayer->mSessionId = android::AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_SESSION);
+    pAudioPlayer->mSessionId = (audio_session_t) android::AudioSystem::newAudioUniqueId(
+            AUDIO_UNIQUE_ID_USE_SESSION);
 
     // placeholder: not necessary yet as session ID lifetime doesn't extend beyond player
     // android::AudioSystem::acquireAudioSessionId(pAudioPlayer->mSessionId);

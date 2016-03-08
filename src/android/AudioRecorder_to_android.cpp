@@ -467,7 +467,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
             audioRecorder_callback,// callback_t
             (void*)ar,             // user, callback data, here the AudioRecorder
             0,                     // notificationFrames
-            0,                     // session ID
+            AUDIO_SESSION_ALLOCATE,
             android::AudioRecord::TRANSFER_CALLBACK,
                                    // transfer type
             policy);               // audio_input_flags_t
