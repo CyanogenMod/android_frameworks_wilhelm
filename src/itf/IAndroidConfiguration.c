@@ -382,3 +382,13 @@ void IAndroidConfiguration_init(void *self)
     IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
     thiz->mItf = &IAndroidConfiguration_Itf;
 }
+
+void IAndroidConfiguration_deinit(void *self)
+{
+    IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
+    if (thiz->mRoutingProxy != NULL) {
+        thiz->mItf->ReleaseJavaProxy(&thiz->mItf, SL_ANDROID_JAVA_PROXY_ROUTING);
+    }
+
+}
+
