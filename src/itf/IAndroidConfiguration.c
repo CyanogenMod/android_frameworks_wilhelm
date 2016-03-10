@@ -115,19 +115,19 @@ static SLresult ValidatePlayerConfig(IAndroidConfiguration* iConfig) {
 
         switch (player->mAndroidObjType) {
             case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-                if (player->mObject.mState != SL_OBJECT_STATE_REALIZED) {
-                        // Make sure the player has been realized.
-                        result = SL_RESULT_PRECONDITIONS_VIOLATED;
-                        SL_LOGE("Error creating routing object - Player not realized.");
-                    } else {
-                        android::AudioTrack* pAudioTrack = player->mAudioTrack.get();
-                        if (pAudioTrack == NULL) {
-                            result = SL_RESULT_INTERNAL_ERROR;
-                            SL_LOGE("Error creating routing object - Couldn't get AudioTrack.");
-                        } else {
-                            result = SL_RESULT_SUCCESS;
-                        }
-                    }
+//                if (player->mObject.mState != SL_OBJECT_STATE_REALIZED) {
+//                    // Make sure the player has been realized.
+//                    result = SL_RESULT_PRECONDITIONS_VIOLATED;
+//                    SL_LOGE("Error creating routing object - Player not realized.");
+//                } else {
+//                    android::AudioTrack* pAudioTrack = player->mAudioTrack.get();
+//                    if (pAudioTrack == NULL) {
+//                        result = SL_RESULT_INTERNAL_ERROR;
+//                        SL_LOGE("Error creating routing object - Couldn't get AudioTrack.");
+//                    } else {
+                        result = SL_RESULT_SUCCESS;
+//                    }
+//                }
                 break;
 
             default:

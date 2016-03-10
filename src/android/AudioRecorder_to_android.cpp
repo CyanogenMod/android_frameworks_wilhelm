@@ -23,6 +23,8 @@
 #include <system/audio.h>
 #include <SLES/OpenSLES_Android.h>
 
+#include <android_runtime/AndroidRuntime.h>
+
 #define KEY_RECORDING_SOURCE_PARAMSIZE  sizeof(SLuint32)
 #define KEY_RECORDING_PRESET_PARAMSIZE  sizeof(SLuint32)
 
@@ -480,6 +482,25 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
         result = SL_RESULT_CONTENT_UNSUPPORTED;
         ar->mAudioRecord.clear();
     }
+
+    // If there is a JavaAudioRoutingProxy associated with this recorder, hook it up...
+    JNIEnv* j_env = NULL;
+    jclass clsAudioRecord = NULL;
+    jmethodID midRoutingProxy_connect = NULL;
+    if (ar->mAndroidConfiguration.mRoutingProxy != NULL &&
+            (j_env = android::AndroidRuntime::getJNIEnv()) != NULL &&
+            (clsAudioRecord = j_env->FindClass("android/media/AudioRecord")) != NULL &&
+            (midRoutingProxy_connect =
+                j_env->GetMethodID(clsAudioRecord, "deferred_connect", "(J)V")) != NULL) {
+        j_env->ExceptionClear();
+        j_env->CallVoidMethod(ar->mAndroidConfiguration.mRoutingProxy,
+                              midRoutingProxy_connect,
+                              ar->mAudioRecord.get());
+        if (j_env->ExceptionCheck()) {
+            SL_LOGE("Java exception releasing recorder routing object.");
+            result = SL_RESULT_INTERNAL_ERROR;
+        }
+   }
 
     return result;
 }

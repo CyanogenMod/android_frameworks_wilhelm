@@ -22,6 +22,8 @@
 #include "android/include/AacBqToPcmCbRenderer.h"
 #include "android/channels.h"
 
+#include <android_runtime/AndroidRuntime.h>
+
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -1519,7 +1521,26 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         // This use case does not have a separate "prepare" step
         pAudioPlayer->mAndroidObjState = ANDROID_READY;
+
+        // If there is a JavaAudioRoutingProxy associated with this player, hook it up...
+        JNIEnv* j_env = NULL;
+        jclass clsAudioTrack = NULL;
+        jmethodID midRoutingProxy_connect = NULL;
+        if (pAudioPlayer->mAndroidConfiguration.mRoutingProxy != NULL &&
+                (j_env = android::AndroidRuntime::getJNIEnv()) != NULL &&
+                (clsAudioTrack = j_env->FindClass("android/media/AudioTrack")) != NULL &&
+                (midRoutingProxy_connect =
+                    j_env->GetMethodID(clsAudioTrack, "deferred_connect", "(J)V")) != NULL) {
+            j_env->ExceptionClear();
+            j_env->CallVoidMethod(pAudioPlayer->mAndroidConfiguration.mRoutingProxy,
+                                  midRoutingProxy_connect,
+                                  pAudioPlayer->mAudioTrack.get());
+            if (j_env->ExceptionCheck()) {
+                SL_LOGE("Java exception releasing recorder routing object.");
+                result = SL_RESULT_INTERNAL_ERROR;
+            }
         }
+    }
         break;
 
     //-----------------------------------
