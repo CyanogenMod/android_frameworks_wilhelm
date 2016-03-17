@@ -67,7 +67,7 @@ enum AndroidObjectState {
 
 struct AudioPlayback_Parameters {
     audio_stream_type_t streamType;
-    int sessionId;
+    audio_session_t sessionId;
 };
 
 /**

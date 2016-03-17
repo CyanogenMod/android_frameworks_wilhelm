@@ -94,7 +94,7 @@
     /** identifies the initialization and preparation state */
     enum AndroidObjectState mAndroidObjState;
     /** identifies which group of effects ("session") this player belongs to */
-    int mSessionId;
+    audio_session_t mSessionId;
     /** identifies the Android stream type playback will occur on */
     audio_stream_type_t mStreamType;
     // FIXME consolidate the next several variables into one class to avoid placement new
@@ -344,7 +344,7 @@ typedef struct CMediaPlayer_struct {
     /** identifies the initialization and preparation state */
     enum AndroidObjectState mAndroidObjState;
     /** identifies which group of effects ("session") this player belongs to */
-    int mSessionId;
+    audio_session_t mSessionId;
     /** identifies the Android stream type playback will occur on */
     audio_stream_type_t mStreamType;
 #endif
