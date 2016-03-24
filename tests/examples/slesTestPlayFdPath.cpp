@@ -33,7 +33,6 @@
 #define PREFETCHEVENT_ERROR_CANDIDATE \
             (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
 
-static int testMode;
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
 #define ExitOnError(x) ExitOnErrorFunc(x,__LINE__)
