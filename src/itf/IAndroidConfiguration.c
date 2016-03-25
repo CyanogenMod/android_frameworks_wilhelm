@@ -107,7 +107,7 @@ static SLresult ValidatePlayerConfig(IAndroidConfiguration* iConfig) {
 
     if (iConfig->mRoutingProxy != NULL) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
-        SL_LOGE("Error creating routing object - Routing Proxy Already Acquired.");
+        SL_LOGE("Error creating player routing object - Routing Proxy Already Acquired.");
     }
     else {
         IObject* configObj = iConfig->mThis;                // get corresponding object
@@ -115,6 +115,7 @@ static SLresult ValidatePlayerConfig(IAndroidConfiguration* iConfig) {
 
         switch (player->mAndroidObjType) {
             case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
+                //TODO remove these commented out lines when our comfort level is good
 //                if (player->mObject.mState != SL_OBJECT_STATE_REALIZED) {
 //                    // Make sure the player has been realized.
 //                    result = SL_RESULT_PRECONDITIONS_VIOLATED;
@@ -159,7 +160,8 @@ static SLresult AllocPlayerRoutingProxy(IAndroidConfiguration* iConfig, jobject*
     jobject localObjRef =
         j_env->NewObject(clsAudioTrackRoutingProxy,
                          midAudioTrackRoutingProxy_ctor,
-                         (uintptr_t)pAudioTrack /*audioTrackObjInLong*/);
+                         (jlong)pAudioTrack /*audioTrackObjInLong*/);
+
     *proxyObj = j_env->NewGlobalRef(localObjRef);
 
     if (j_env->ExceptionCheck()) {
@@ -179,28 +181,29 @@ static SLresult ValidateRecorderConfig(IAndroidConfiguration* iConfig) {
 
     if (iConfig->mRoutingProxy != NULL) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
-        SL_LOGE("Error creating routing object - Routing Proxy Already Acquired.");
+        SL_LOGE("Error creating record routing object - Routing Proxy Already Acquired.");
     } else {
         IObject* configObj = iConfig->mThis;                  // get corresponding object
         CAudioRecorder* recorder = (CAudioRecorder*)configObj;  // get the native recorder
         switch (recorder->mAndroidObjType) {
             case AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE:
-                if (recorder->mObject.mState != SL_OBJECT_STATE_REALIZED) {
-                    // Make sure the recorder has been realized.
-                    result = SL_RESULT_PRECONDITIONS_VIOLATED;
-                    SL_LOGE("Error creating routing object - Recorder not realized.");
-                } else {
-                    android::AudioRecord* pAudioRecord = recorder->mAudioRecord.get();
-                    if (pAudioRecord == NULL) {
-                        result = SL_RESULT_INTERNAL_ERROR;
-                        SL_LOGE("Error creating routing object - Couldn't get AudioRecord.");
-                    } else if (iConfig->mRoutingProxy != NULL) {
-                        result = SL_RESULT_PRECONDITIONS_VIOLATED;
-                        SL_LOGE("Error creating routing object - Routing Proxy Already Acquired.");
-                    } else {
+                //TODO remove these commented out lines when our comfort level is good
+//                if (recorder->mObject.mState != SL_OBJECT_STATE_REALIZED) {
+//                    // Make sure the recorder has been realized.
+//                    result = SL_RESULT_PRECONDITIONS_VIOLATED;
+//                    SL_LOGE("Error creating routing object - Recorder not realized.");
+//                } else {
+//                    android::AudioRecord* pAudioRecord = recorder->mAudioRecord.get();
+//                    if (pAudioRecord == NULL) {
+//                        result = SL_RESULT_INTERNAL_ERROR;
+//                        SL_LOGE("Error creating routing object - Couldn't get AudioRecord.");
+//                    } else if (iConfig->mRoutingProxy != NULL) {
+//                        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+//                        SL_LOGE("Error creating routing object - Routing Proxy Already Acquired.");
+//                    } else {
                         result = SL_RESULT_SUCCESS;
-                    }
-                }
+//                    }
+//                }
                 break;
 
             default:
@@ -229,9 +232,10 @@ static SLresult AllocRecorderRoutingProxy(IAndroidConfiguration* iConfig, jobjec
 
     j_env->ExceptionClear();
     jobject localObjRef =
-            j_env->NewObject(clsAudioRecordRoutingProxy,
-                             midAudioRecordRoutingProxy_ctor,
-                             (uintptr_t)pAudioRecord /*audioRecordObjInLong*/);
+        j_env->NewObject(clsAudioRecordRoutingProxy,
+                         midAudioRecordRoutingProxy_ctor,
+                         (jlong)pAudioRecord /*audioRecordObjInLong*/);
+
     *proxyObj = j_env->NewGlobalRef(localObjRef);
     if (j_env->ExceptionCheck()) {
         SL_LOGE("Java exception creating recorder routing object.");
@@ -364,6 +368,7 @@ static SLresult IAndroidConfiguration_ReleaseJavaProxy(SLAndroidConfigurationItf
             }
             break;
         }
+
         result = SL_RESULT_SUCCESS;
     }
 
@@ -389,6 +394,5 @@ void IAndroidConfiguration_deinit(void *self)
     if (thiz->mRoutingProxy != NULL) {
         thiz->mItf->ReleaseJavaProxy(&thiz->mItf, SL_ANDROID_JAVA_PROXY_ROUTING);
     }
-
 }
 
