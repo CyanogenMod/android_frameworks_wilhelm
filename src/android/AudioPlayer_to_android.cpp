@@ -1495,6 +1495,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             policy = AUDIO_OUTPUT_FLAG_NONE;
         }
 
+        // negative notificationFrames is the number of notifications (sub-buffers) per track buffer
+        // for details see the explanation at frameworks/av/include/media/AudioTrack.h
+        const int32_t notificationFrames = -pAudioPlayer->mBufferQueue.mNumBuffers;
+
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
@@ -1504,7 +1508,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 policy,                                              // flags
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
-                0,     // FIXME find appropriate frame count         // notificationFrame
+                notificationFrames,                                  // see comment above
                 pAudioPlayer->mSessionId);
         android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
         if (status != android::NO_ERROR) {
