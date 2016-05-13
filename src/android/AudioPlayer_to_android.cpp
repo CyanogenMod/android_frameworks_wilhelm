@@ -1489,15 +1489,17 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             channelMask);
 
         audio_output_flags_t policy;
+        int32_t notificationFrames;
         if (canUseFastTrack(pAudioPlayer)) {
             policy = (audio_output_flags_t)(AUDIO_OUTPUT_FLAG_FAST | AUDIO_OUTPUT_FLAG_RAW);
+            // negative notificationFrames is the number of notifications (sub-buffers) per track buffer
+            // for details see the explanation at frameworks/av/include/media/AudioTrack.h
+            notificationFrames = -pAudioPlayer->mBufferQueue.mNumBuffers;
         } else {
             policy = AUDIO_OUTPUT_FLAG_NONE;
+            // use default notifications
+            notificationFrames = 0;
         }
-
-        // negative notificationFrames is the number of notifications (sub-buffers) per track buffer
-        // for details see the explanation at frameworks/av/include/media/AudioTrack.h
-        const int32_t notificationFrames = -pAudioPlayer->mBufferQueue.mNumBuffers;
 
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
