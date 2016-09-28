@@ -46,6 +46,9 @@ SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
     case SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION:
         newRecordSource = AUDIO_SOURCE_VOICE_COMMUNICATION;
         break;
+    case SL_ANDROID_RECORDING_PRESET_HOTWORD:
+        newRecordSource = AUDIO_SOURCE_HOTWORD;
+        break;
     case SL_ANDROID_RECORDING_PRESET_NONE:
         // it is an error to set preset "none"
     default:
